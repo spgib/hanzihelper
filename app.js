@@ -15,6 +15,7 @@ app.set('view engine', '.hbs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.urlencoded({extended: false}));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(authRoutes);
 app.use(dashboardRoutes);
@@ -22,7 +23,7 @@ app.use(dashboardRoutes);
 app.get('/500', errorController.get500);
 app.use(errorController.get404);
 
-app.use((req, res, next, error) => {
+app.use((error, req, res, next) => {
   res.redirect('/500');
 });
 

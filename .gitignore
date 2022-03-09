@@ -106,4 +106,6 @@ dist
 # Design
 designdoc.yml
 
+#dev evn
+nodemon.json
 

@@ -6,27 +6,27 @@ const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const errorController = require('./controllers/error');
 
-const app = express();
+module.exports = () => {
+  const app = express();
+  
+  app.engine('.hbs', engine({
+    extname: '.hbs',
+  }));
+  app.set('view engine', '.hbs');
+  app.set('views', path.join(__dirname, 'views'));
+  
+  app.use(express.urlencoded({extended: false}));
+  app.use(express.static(path.join(__dirname, 'public')));
+  
+  app.use(authRoutes);
+  app.use(dashboardRoutes);
+  
+  app.get('/500', errorController.get500);
+  app.use(errorController.get404);
+  
+  app.use((error, req, res, next) => {
+    res.redirect('/500');
+  });
 
-app.engine('.hbs', engine({
-  extname: '.hbs',
-}));
-app.set('view engine', '.hbs');
-app.set('views', path.join(__dirname, 'views'));
-
-app.use(express.urlencoded({extended: false}));
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(authRoutes);
-app.use(dashboardRoutes);
-
-app.get('/500', errorController.get500);
-app.use(errorController.get404);
-
-app.use((error, req, res, next) => {
-  res.redirect('/500');
-});
-
-app.listen(3000, () => {
-  console.log('listening');
-});
+  return app;
+}

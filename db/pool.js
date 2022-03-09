@@ -34,4 +34,6 @@ class Pool {
   }
 }
 
-module.exports = new Pool();
+const pool = new Pool();
+
+module.exports = pool;

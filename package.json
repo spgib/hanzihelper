@@ -19,10 +19,16 @@
   "homepage": "https://github.com/spgib/hanzihelper#readme",
   "devDependencies": {
     "jest": "^27.5.1",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "sass": "^1.49.9"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "connect-pg-simple": "^7.0.0",
+    "csurf": "^1.11.0",
     "express": "^4.17.3",
-    "express-handlebars": "^6.0.3"
+    "express-handlebars": "^6.0.3",
+    "express-session": "^1.17.2",
+    "pg": "^8.7.3"
   }
 }

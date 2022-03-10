@@ -23,7 +23,18 @@ class Pool {
     }
   }
 
-  init() {}
+  init() {
+    this._pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        username VARCHAR(25) NOT NULL UNIQUE,
+        email VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR (100) NOT NULL 
+      );
+    `);
+  }
 
   close() {
     return this._pool.end();

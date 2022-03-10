@@ -3,6 +3,7 @@ const express = require('express');
 const pool = require('./db/pool');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
+const csurf = require('csurf');
 const { engine } = require('express-handlebars');
 
 const authRoutes = require('./routes/auth');
@@ -36,6 +37,12 @@ module.exports = () => {
       cookie: { maxAge: 1000 * 60 * 60 },
     })
   );
+  app.use(csurf());
+
+  app.use((req, res, next) => {
+    res.locals.csrfToken = req.csrfToken();
+    next();
+  })
 
   app.use(authRoutes);
   app.use(dashboardRoutes);
@@ -44,6 +51,7 @@ module.exports = () => {
   app.use(errorController.get404);
 
   app.use((error, req, res, next) => {
+    console.log(error);
     res.redirect('/500');
   });
 

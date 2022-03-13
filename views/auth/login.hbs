@@ -1,4 +1,7 @@
 <main>
+  {{#if errors }}
+    <h3>{{errorMessage}}</h3>
+  {{/if}}
   <form class="login-form" action="/login" method="POST">
     <div class="form-control">
       <label for="email">Email</label>

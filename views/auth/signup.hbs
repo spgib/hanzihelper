@@ -1,22 +1,40 @@
 <main>
-  <form class="signup-form" action="/signup" method="POST">
-    <div class="form-control">
-      <label for="username">Username</label>
-      <input id="username" name="username" type="text">
+  {{#if errors}}
+    <h3>{{errorMessage}}</h3>
+  {{/if}}
+  <form class='signup-form' action='/signup' method='POST'>
+    <div class='form-control'>
+      <label for='username'>Username</label>
+      <input
+        id='username'
+        name='username'
+        type='text'
+        value='{{oldInput.username}}'
+      />
     </div>
-    <div class="form-control">
-      <label for="email">Email</label>
-      <input id="email" name="email" type="email">
+    <div class='form-control'>
+      <label for='email'>Email</label>
+      <input id='email' name='email' type='email' value='{{oldInput.email}}' />
     </div>
-    <div class="form-control">
-      <label for="password">Password</label>
-      <input id="password" name="password" type="password">
+    <div class='form-control'>
+      <label for='password'>Password</label>
+      <input
+        id='password'
+        name='password'
+        type='password'
+        value='{{oldInput.password}}'
+      />
     </div>
-    <div class="form-control">
-      <label for="confirmPassword">Confirm Password</label>
-      <input id="confirmPassword" name="confirmPassword" type="password">
+    <div class='form-control'>
+      <label for='confirmPassword'>Confirm Password</label>
+      <input
+        id='confirmPassword'
+        name='confirmPassword'
+        type='password'
+        value='{{oldInput.confirmPassword}}'
+      />
     </div>
-    <input type="hidden" name="_csrf" value="{{csrfToken}}">
-    <button type="submit">Sign Up</button>
+    <input type='hidden' name='_csrf' value='{{csrfToken}}' />
+    <button type='submit'>Sign Up</button>
   </form>
 </main>

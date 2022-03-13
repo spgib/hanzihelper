@@ -46,7 +46,7 @@ exports.postSignup = async (req, res, next) => {
   }
 
   if (existingUsername !== undefined) {
-    res.status(422).render('./auth/signup', {
+    return res.status(422).render('./auth/signup', {
       title: 'Sign Up',
       errors: true,
       errorMessage: 'A user has already registered this username.',
@@ -69,7 +69,7 @@ exports.postSignup = async (req, res, next) => {
   }
 
   if (existingEmail !== undefined) {
-    res.status(422).render('./auth/signup', {
+    return res.status(422).render('./auth/signup', {
       title: 'Sign Up',
       errors: true,
       errorMessage: 'A user has already registered an account with this email address.',
@@ -102,6 +102,7 @@ exports.postSignup = async (req, res, next) => {
 
   if (user) {
     req.session.user = user;
+    req.session.isLoggedIn = true;
     return req.session.save(err => {
       console.log(err);
       res.redirect('/dash');

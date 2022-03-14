@@ -1,16 +1,25 @@
-<header class="main-header">
-  <nav class="main-header__nav">
-    <ul class="main-header__item-list">
-      <li class="main-header__item">
-        <a href="/login">Log in</a>
-      </li>
-      <li class="main-header__item">
-        <a href="/signup">Sign up</a>
-      </li>
+<header class='main-header'>
+  <nav class='main-header__nav'>
+    <ul class='main-header__item-list'>
+      {{#if isAuthenticated}}
+        <li class='main-header__item'>
+          <form action='/logout' method='POST'>
+            <input type='hidden' name='_csrf' value='{{csrfToken}}' />
+            <button type='submit'>Log out</button>
+          </form>
+        </li>
+      {{else}}
+        <li class='main-header__item'>
+          <a href='/login'>Log in</a>
+        </li>
+        <li class='main-header__item'>
+          <a href='/signup'>Sign up</a>
+        </li>
+      {{/if}}
     </ul>
   </nav>
 
-  <nav class="mobile-nav">
+  <nav class='mobile-nav'>
 
   </nav>
 </header>

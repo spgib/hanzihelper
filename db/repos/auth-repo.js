@@ -12,7 +12,7 @@ class AuthRepo {
 
   static async findUserByEmail(email) {
     const { rows } = await pool.query(
-      `SELECT id FROM users WHERE email = $1;`,
+      `SELECT * FROM users WHERE email = $1;`,
       [email]
     );
 

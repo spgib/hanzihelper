@@ -2,35 +2,31 @@ const AuthRepo = require('../db/repos/auth-repo');
 const bcrypt = require('bcrypt');
 
 exports.getLogin = (req, res, next) => {
-  res
-    .status(200)
-    .render('./auth/login', {
-      title: 'Log In',
-      errors: false,
-      errorMessage: null,
-      oldInput: {
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      }
-    });
+  res.status(200).render('./auth/login', {
+    title: 'Log In',
+    errors: false,
+    errorMessage: null,
+    oldInput: {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 };
 
 exports.getSignup = (req, res, next) => {
-  res
-    .status(200)
-    .render('./auth/signup', {
-      title: 'Sign Up',
-      errors: false,
-      errorMessage: null,
-      oldInput: {
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      }
-    });
+  res.status(200).render('./auth/signup', {
+    title: 'Sign Up',
+    errors: false,
+    errorMessage: null,
+    oldInput: {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 };
 
 exports.postSignup = async (req, res, next) => {
@@ -54,8 +50,8 @@ exports.postSignup = async (req, res, next) => {
         username,
         email,
         password,
-        confirmPassword
-      }
+        confirmPassword,
+      },
     });
   }
 
@@ -72,13 +68,14 @@ exports.postSignup = async (req, res, next) => {
     return res.status(422).render('./auth/signup', {
       title: 'Sign Up',
       errors: true,
-      errorMessage: 'A user has already registered an account with this email address.',
+      errorMessage:
+        'A user has already registered an account with this email address.',
       oldInput: {
         username,
         email,
         password,
-        confirmPassword
-      }
+        confirmPassword,
+      },
     });
   }
 
@@ -103,9 +100,76 @@ exports.postSignup = async (req, res, next) => {
   if (user) {
     req.session.user = user;
     req.session.isLoggedIn = true;
-    return req.session.save(err => {
+    return req.session.save((err) => {
       console.log(err);
       res.redirect('/dash');
     });
   }
+};
+
+exports.postLogin = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  let user;
+  try {
+    user = await AuthRepo.findUserByEmail(email);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+
+  if (user === undefined) {
+    return res.status(401).render('./auth/login', {
+      title: 'Sign Up',
+      errors: true,
+      errorMessage: 'Cannot find an account registered to this email address.',
+      oldInput: {
+        email,
+        password,
+      },
+    });
+  }
+
+  let isValidPassword = false;
+  try {
+    isValidPassword = await bcrypt.compare(password, user.password);
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+
+  if (!isValidPassword) {
+    return res.status(401).render('./auth/login', {
+      title: 'Sign Up',
+      errors: true,
+      errorMessage: 'Invalid password, please try again!',
+      oldInput: {
+        email,
+        password,
+      },
+    });
+  }
+
+  req.session.user = {
+    id: user.id,
+    username: user.username,
+  };
+  req.session.isLoggedIn = true;
+  return req.session.save((err) => {
+    if (err) {
+      console.log(err);
+    }
+    res.redirect('/dash');
+  });
+};
+
+exports.postLogout = (req, res, next) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err);
+    }
+    res.redirect('/login');
+  });
 };

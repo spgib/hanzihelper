@@ -6,7 +6,7 @@ const AuthRepo = require('../db/repos/auth-repo');
 const bcrypt = require('bcrypt');
 
 describe('Auth Controller - Signup', function () {
-  beforeEach(function () {
+  this.beforeEach(function () {
     sinon.stub(AuthRepo, 'findUserByUsername');
     sinon.stub(AuthRepo, 'findUserByEmail');
     sinon.stub(AuthRepo, 'insertUser');
@@ -55,7 +55,7 @@ describe('Auth Controller - Signup', function () {
     expect(res).to.have.property('httpStatusCode', 500);
   });
 
-  it('should re-render page with 422 error and message if duplicate username or email is entered', async function () {
+  it('should re-render page with 422 error if duplicate username or email is entered', async function () {
     const req = {
       body: {
         username: 'test',
@@ -101,17 +101,102 @@ describe('Auth Controller - Signup', function () {
     AuthRepo.findUserByUsername.returns(undefined);
     AuthRepo.findUserByEmail.returns(undefined);
     bcrypt.hash.returns('abc');
-    AuthRepo.insertUser.returns('user');
+    AuthRepo.insertUser.returns({ id: 1, username: 'tester' });
     await AuthController.postSignup(req, {}, () => {});
     expect(req.session).to.have.property('user');
-    expect(req.session.user).to.equal('user');
+    expect(req.session.user).to.deep.equal({ id: 1, username: 'tester' });
     expect(req.session.isLoggedIn).to.equal(true);
   });
 
-  afterEach(function () {
+  this.afterEach(function () {
     AuthRepo.findUserByUsername.restore();
     AuthRepo.findUserByEmail.restore();
     bcrypt.hash.restore();
     AuthRepo.insertUser.restore();
+  });
+});
+
+describe('Auth Controller - Log in', function () {
+  this.beforeEach(function () {
+    sinon.stub(AuthRepo, 'findUserByEmail');
+    sinon.stub(bcrypt, 'compare');
+  });
+
+  it('should forward a 500-code error if accessing db/module fails', async function () {
+    const req = {
+      body: {
+        username: 'tester',
+        password: 'password',
+      },
+    };
+
+    let res;
+    const next = (err) => {
+      res = err;
+    };
+
+    AuthRepo.findUserByEmail.throws();
+    await AuthController.postLogin(req, {}, next);
+    expect(res).to.be.an('error');
+    expect(res).to.have.property('httpStatusCode', 500);
+    AuthRepo.findUserByEmail.returns('abc');
+    res = null;
+
+    bcrypt.compare.throws();
+    await AuthController.postLogin(req, {}, next);
+    expect(res).to.be.an('error');
+    expect(res).to.have.property('httpStatusCode', 500);
+  });
+
+  it('should re-render page with 401 error if login credentials fail authorization', async function () {
+    const req = {
+      body: {
+        username: 'tester',
+        password: 'password',
+      },
+    };
+
+    let resCode;
+    const res = {
+      status: (code) => {
+        resCode = code;
+        return res;
+      },
+      render: () => {},
+    };
+
+    AuthRepo.findUserByEmail.returns(undefined);
+    await AuthController.postLogin(req, res, () => {});
+    expect(resCode).to.equal(401);
+    AuthRepo.findUserByEmail.returns('user');
+    resCode = null;
+
+    bcrypt.compare.returns(false);
+    await AuthController.postLogin(req, res, () => {});
+    expect(resCode).to.equal(401);
+  });
+
+  it('should configure session on successful signup', async function () {
+    const req = {
+      body: {
+        username: 'tester',
+        password: 'password',
+      },
+      session: {
+        save: () => {}
+      },
+    };
+
+    AuthRepo.findUserByEmail.returns({ id: 1, username: 'tester' });
+    bcrypt.compare.returns(true);
+    await AuthController.postLogin(req);
+    expect(req.session).to.have.property('user');
+    expect(req.session.user).to.deep.equal({ id: 1, username: 'tester' });
+    expect(req.session.isLoggedIn).to.equal(true);
+  });
+
+  this.afterEach(function () {
+    AuthRepo.findUserByEmail.restore();
+    bcrypt.compare.restore();
   });
 });

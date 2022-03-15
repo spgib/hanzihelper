@@ -3,5 +3,5 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getDashboard = (req, res, next) => {
-  res.render('./dashboard/dash', { title: 'DASH' });
+  res.render('./dash/dash', { title: 'DASH', dash: true });
 };

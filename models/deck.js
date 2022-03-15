@@ -9,7 +9,8 @@ class Deck {
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       title VARCHAR(50) NOT NULL UNIQUE,
       description VARCHAR(200),
-      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE 
+      creator_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      public BOOLEAN NOT NULL DEFAULT FALSE
     )
 `);
   }

@@ -1,4 +1,5 @@
 const pool = require('../db/pool');
+const toCamelCase = require('../db/utils/to-camel-case');
 
 class User {
   static init() {
@@ -24,12 +25,13 @@ class User {
   }
 
   static async findByEmail(email) {
-    const { rows } = await pool.query(
-      `SELECT * FROM users WHERE email = $1;`,
-      [email]
-    );
+    const { rows } = await pool.query(`SELECT * FROM users WHERE email = $1;`, [
+      email,
+    ]);
 
-    return rows[0];
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
   }
 
   static async insert(username, email, password) {
@@ -38,7 +40,9 @@ class User {
       [username, email, password]
     );
 
-    return rows[0];
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
   }
 }
 

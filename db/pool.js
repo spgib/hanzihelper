@@ -1,6 +1,4 @@
 const pg = require('pg');
-const User = require('../models/user');
-const Deck = require('../models/deck');
 
 class Pool {
   _pool = null;
@@ -23,10 +21,6 @@ class Pool {
     if (retries === 0) {
       throw new Error('Could not connect to database.');
     }
-  }
-
-  init() {
-    User.init();
   }
 
   close() {

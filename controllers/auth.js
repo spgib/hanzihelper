@@ -1,4 +1,4 @@
-const AuthRepo = require('../db/repos/auth-repo');
+const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
 exports.getLogin = (req, res, next) => {
@@ -34,7 +34,7 @@ exports.postSignup = async (req, res, next) => {
 
   let existingUsername;
   try {
-    existingUsername = await AuthRepo.findUserByUsername(username);
+    existingUsername = await User.findByUsername(username);
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;
@@ -57,7 +57,7 @@ exports.postSignup = async (req, res, next) => {
 
   let existingEmail;
   try {
-    existingEmail = await AuthRepo.findUserByEmail(email);
+    existingEmail = await User.findByEmail(email);
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;
@@ -90,7 +90,7 @@ exports.postSignup = async (req, res, next) => {
 
   let user;
   try {
-    user = await AuthRepo.insertUser(username, email, hashedPassword);
+    user = await User.insert(username, email, hashedPassword);
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;
@@ -112,7 +112,7 @@ exports.postLogin = async (req, res, next) => {
 
   let user;
   try {
-    user = await AuthRepo.findUserByEmail(email);
+    user = await User.findByEmail(email);
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;

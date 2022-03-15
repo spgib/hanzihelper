@@ -2,14 +2,14 @@ const expect = require('chai').expect;
 const sinon = require('sinon');
 
 const AuthController = require('../controllers/auth');
-const AuthRepo = require('../db/repos/auth-repo');
+const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
 describe('Auth Controller - Signup', function () {
   this.beforeEach(function () {
-    sinon.stub(AuthRepo, 'findUserByUsername');
-    sinon.stub(AuthRepo, 'findUserByEmail');
-    sinon.stub(AuthRepo, 'insertUser');
+    sinon.stub(User, 'findByUsername');
+    sinon.stub(User, 'findByEmail');
+    sinon.stub(User, 'insert');
     sinon.stub(bcrypt, 'hash');
   });
 
@@ -28,18 +28,18 @@ describe('Auth Controller - Signup', function () {
       res = x;
     };
 
-    AuthRepo.findUserByUsername.throws();
+    User.findByUsername.throws();
     await AuthController.postSignup(req, {}, next);
     expect(res).to.be.an('error');
     expect(res).to.have.property('httpStatusCode', 500);
-    AuthRepo.findUserByUsername.returns(undefined);
+    User.findByUsername.returns(undefined);
     res = null;
 
-    AuthRepo.findUserByEmail.throws();
+    User.findByEmail.throws();
     await AuthController.postSignup(req, {}, next);
     expect(res).to.be.an('error');
     expect(res).to.have.property('httpStatusCode', 500);
-    AuthRepo.findUserByEmail.returns(undefined);
+    User.findByEmail.returns(undefined);
     res = null;
 
     bcrypt.hash.throws();
@@ -49,7 +49,7 @@ describe('Auth Controller - Signup', function () {
     bcrypt.hash.returns('abc');
     res = null;
 
-    AuthRepo.insertUser.throws();
+    User.insert.throws();
     await AuthController.postSignup(req, {}, next);
     expect(res).to.be.an('error');
     expect(res).to.have.property('httpStatusCode', 500);
@@ -74,13 +74,13 @@ describe('Auth Controller - Signup', function () {
       render: () => {},
     };
 
-    AuthRepo.findUserByUsername.returns('duplicate');
+    User.findByUsername.returns('duplicate');
     await AuthController.postSignup(req, res, () => {});
     expect(resStatusCode).to.equal(422);
-    AuthRepo.findUserByUsername.returns(undefined);
+    User.findByUsername.returns(undefined);
     resStatusCode = null;
 
-    AuthRepo.findUserByEmail.returns('duplicate');
+    User.findByEmail.returns('duplicate');
     await AuthController.postSignup(req, res, () => {});
     expect(resStatusCode).to.equal(422);
   });
@@ -98,10 +98,10 @@ describe('Auth Controller - Signup', function () {
       },
     };
 
-    AuthRepo.findUserByUsername.returns(undefined);
-    AuthRepo.findUserByEmail.returns(undefined);
+    User.findByUsername.returns(undefined);
+    User.findByEmail.returns(undefined);
     bcrypt.hash.returns('abc');
-    AuthRepo.insertUser.returns({ id: 1, username: 'tester' });
+    User.insert.returns({ id: 1, username: 'tester' });
     await AuthController.postSignup(req, {}, () => {});
     expect(req.session).to.have.property('user');
     expect(req.session.user).to.deep.equal({ id: 1, username: 'tester' });
@@ -109,16 +109,16 @@ describe('Auth Controller - Signup', function () {
   });
 
   this.afterEach(function () {
-    AuthRepo.findUserByUsername.restore();
-    AuthRepo.findUserByEmail.restore();
+    User.findByUsername.restore();
+    User.findByEmail.restore();
     bcrypt.hash.restore();
-    AuthRepo.insertUser.restore();
+    User.insert.restore();
   });
 });
 
 describe('Auth Controller - Log in', function () {
   this.beforeEach(function () {
-    sinon.stub(AuthRepo, 'findUserByEmail');
+    sinon.stub(User, 'findByEmail');
     sinon.stub(bcrypt, 'compare');
   });
 
@@ -135,11 +135,11 @@ describe('Auth Controller - Log in', function () {
       res = err;
     };
 
-    AuthRepo.findUserByEmail.throws();
+    User.findByEmail.throws();
     await AuthController.postLogin(req, {}, next);
     expect(res).to.be.an('error');
     expect(res).to.have.property('httpStatusCode', 500);
-    AuthRepo.findUserByEmail.returns('abc');
+    User.findByEmail.returns('abc');
     res = null;
 
     bcrypt.compare.throws();
@@ -165,10 +165,10 @@ describe('Auth Controller - Log in', function () {
       render: () => {},
     };
 
-    AuthRepo.findUserByEmail.returns(undefined);
+    User.findByEmail.returns(undefined);
     await AuthController.postLogin(req, res, () => {});
     expect(resCode).to.equal(401);
-    AuthRepo.findUserByEmail.returns('user');
+    User.findByEmail.returns('user');
     resCode = null;
 
     bcrypt.compare.returns(false);
@@ -187,7 +187,7 @@ describe('Auth Controller - Log in', function () {
       },
     };
 
-    AuthRepo.findUserByEmail.returns({ id: 1, username: 'tester' });
+    User.findByEmail.returns({ id: 1, username: 'tester' });
     bcrypt.compare.returns(true);
     await AuthController.postLogin(req);
     expect(req.session).to.have.property('user');
@@ -196,7 +196,7 @@ describe('Auth Controller - Log in', function () {
   });
 
   this.afterEach(function () {
-    AuthRepo.findUserByEmail.restore();
+    User.findByEmail.restore();
     bcrypt.compare.restore();
   });
 });

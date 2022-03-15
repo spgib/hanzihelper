@@ -34,6 +34,17 @@ class Pool {
         password VARCHAR (100) NOT NULL 
       );
     `);
+
+    this._pool.query(`
+        CREATE TABLE IF NOT EXISTS decks (
+          id SERIAL PRIMARY KEY,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+          title VARCHAR(50) NOT NULL UNIQUE,
+          description VARCHAR(200),
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE 
+        )
+    `);
   }
 
   close() {

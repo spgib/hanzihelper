@@ -1,16 +1,27 @@
 <h1>Hanzi Helper Dashboard</h1>
 
-<ul class="dash__action-list">
-  <li class="dash__action-item">
-    <button type="button">ADD</button>
+<ul class='dash__action-list'>
+  <li class='dash__action-item'>
+    <button type='button'>ADD</button>
   </li>
-  <li class="dash__action-item hidden" >
-    <a href="">Add deck</a>
+  <li class='dash__action-item hidden'>
+    <button type='button'>Add deck</button>
   </li>
-  <li class="dash__action-item hidden">
-    <a href="">Create custom deck</a>
+  <li class='dash__action-item hidden'>
+    <button type='button'>Create custom deck</button>
   </li>
-  <li class="dash__action-item hidden">
-    <a href="">Add card</a>
+  <li class='dash__action-item hidden'>
+    <button type='button'>Add card</button>
   </li>
 </ul>
+<div class='dash__modal-content hidden'>
+  <form class='custom-deck-form' action='/dash/custom' method='POST'>
+    <div class='form-control'>
+      <label for='title'>Deck Title</label>
+      <input type='text' />
+    </div>
+    <input type='hidden' name='_csrf' value='{{csrfToken}}' />
+    <button type='button'>Cancel</button>
+    <button type='submit'>Create Deck</button>
+  </form>
+</div>

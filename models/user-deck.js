@@ -3,7 +3,7 @@ const pool = require('../db/pool');
 class UserDeck {
   static init() {
     pool.query(`
-    CREATE TABLE IF NOT EXISTS user-decks (
+    CREATE TABLE IF NOT EXISTS user_decks (
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       deck_id INTEGER NOT NULL REFERENCES decks(id) ON DELETE CASCADE,

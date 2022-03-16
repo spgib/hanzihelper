@@ -41,20 +41,34 @@ const closeDashActionItems = (items) => {
   });
 };
 
+const closeModal = () => {
+    backdrop.classList.add('hidden');
+    const content = modal.firstElementChild;
+    const inputs = content.querySelectorAll('input');
+    inputs.forEach(i => {
+      i.value = '';
+    });
+    const contentDiv = document.querySelector('.dash__modal-content');
+    contentDiv.append(content);
+};
+
+const backdropClickHandler = function(e) {
+  if (this === e.target) {
+    closeModal();
+  }
+}
+
 const openCustomDeckHandler = () => {
   const customDeckModal = document.querySelector('.custom-deck-modal');
   modal.append(customDeckModal);
   backdrop.classList.remove('hidden');
 };
 
-const closeModal = function (e) {
-    backdrop.classList.add('hidden');
-    const content = modal.firstElementChild;
-    const contentDiv = document.querySelector('.dash__modal-content');
-    contentDiv.append(content);
-};
+const customDeckCancelHandler = () => {
+  closeModal();
+}
 
-backdrop.addEventListener('click', closeModalHandler);
+backdrop.addEventListener('click', backdropClickHandler);
 dashActionBtn.addEventListener('click', actionItemsHandler);
 customDeckBtn.addEventListener('click', openCustomDeckHandler);
-customDeckCancelBtn.addEventListener('click', closeModalHandler);
+customDeckCancelBtn.addEventListener('click', customDeckCancelHandler);

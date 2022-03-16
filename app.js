@@ -4,6 +4,7 @@ const pool = require('./db/pool');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const csurf = require('csurf');
+const flash = require('connect-flash');
 const { engine } = require('express-handlebars');
 
 const authRoutes = require('./routes/auth');
@@ -38,6 +39,7 @@ module.exports = () => {
     })
   );
   app.use(csurf());
+  app.use(flash());
 
   app.use((req, res, next) => {
     res.locals.isAuthenticated = req.session.isLoggedIn;

@@ -9,4 +9,6 @@ router.get('/', dashboardController.getIndex);
 
 router.get('/dash', authCheck, dashboardController.getDashboard);
 
+router.post('/dash/custom', authCheck, dashboardController.postCreateCustomDeck);
+
 module.exports = router;

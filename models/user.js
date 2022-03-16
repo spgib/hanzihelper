@@ -40,9 +40,7 @@ class User {
       [username, email, password]
     );
 
-    const parsedRows = toCamelCase(rows);
-
-    return parsedRows[0];
+    return rows[0];
   }
 }
 

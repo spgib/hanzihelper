@@ -1,9 +1,12 @@
-const backdrop = document.querySelector('.backdrop');
-const modal = document.querySelector('.modal');
 const dashActionBtn = document.querySelector('.dash__action-list button');
 const addDeckBtn = document.querySelectorAll('.dash__action-list button')[1];
 const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
+const customDeckCancelBtn = document.querySelector('.custom-deck-form button');
+const customDeckCreateBtn = document.querySelector('.custom-deck-form button[type="submit"]')
 const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
+const backdrop = document.querySelector('.backdrop');
+const modal = document.querySelector('.modal');
+
 
 const closeModalHandler = function (e) {
   if (this === e.target) {
@@ -40,11 +43,7 @@ const closeDashActionItems = (items) => {
   });
 };
 
-const customDeckHandler = () => {
-  openCustomDeck();
-};
-
-const openCustomDeck = () => {
+const openCustomDeckHandler = () => {
   const customDeckForm = document.querySelector('.custom-deck-form');
   modal.append(customDeckForm);
   backdrop.classList.remove('hidden');
@@ -52,4 +51,5 @@ const openCustomDeck = () => {
 
 backdrop.addEventListener('click', closeModalHandler);
 dashActionBtn.addEventListener('click', actionItemsHandler);
-customDeckBtn.addEventListener('click', customDeckHandler);
+customDeckBtn.addEventListener('click', openCustomDeckHandler);
+customDeckCancelBtn.addEventListener('click', closeModalHandler);

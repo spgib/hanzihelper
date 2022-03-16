@@ -7,15 +7,13 @@ const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
 const backdrop = document.querySelector('.backdrop');
 const modal = document.querySelector('.modal');
 
+const onStart = () => {
+  const startContent = document.getElementById('start-content');
+  if (startContent === null) return;
+  modal.append(startContent);
+}
+onStart();
 
-const closeModalHandler = function (e) {
-  if (this === e.target) {
-    backdrop.classList.add('hidden');
-    const content = modal.firstElementChild;
-    const contentDiv = document.querySelector('.dash__modal-content');
-    contentDiv.append(content);
-  }
-};
 
 const actionItemsHandler = () => {
   const hidden = document.querySelector('.dash__action-list > .hidden');
@@ -30,7 +28,7 @@ const actionItemsHandler = () => {
 const openDashActionItems = (items) => {
   items.forEach((item, index) => {
     if (index === 0) return;
-
+    
     item.classList.remove('hidden');
   });
 };
@@ -38,15 +36,22 @@ const openDashActionItems = (items) => {
 const closeDashActionItems = (items) => {
   items.forEach((item, index) => {
     if (index === 0) return;
-
+    
     item.classList.add('hidden');
   });
 };
 
 const openCustomDeckHandler = () => {
-  const customDeckForm = document.querySelector('.custom-deck-form');
-  modal.append(customDeckForm);
+  const customDeckModal = document.querySelector('.custom-deck-modal');
+  modal.append(customDeckModal);
   backdrop.classList.remove('hidden');
+};
+
+const closeModal = function (e) {
+    backdrop.classList.add('hidden');
+    const content = modal.firstElementChild;
+    const contentDiv = document.querySelector('.dash__modal-content');
+    contentDiv.append(content);
 };
 
 backdrop.addEventListener('click', closeModalHandler);

@@ -15,13 +15,22 @@
   </li>
 </ul>
 <div class='dash__modal-content hidden'>
+  <div {{#if customDeckError}}id='start-content'{{/if}} class="custom-deck-modal">
+    {{#if customDeckError}}
+    <h3>{{errorMessage}}</h3>
+    {{/if}}
   <form class='custom-deck-form' action='/dash/custom' method='POST'>
     <div class='form-control'>
       <label for='title'>Deck Title</label>
+      {{#if customDeckError}}
+      <input type='text' name='title' value="{{oldInput.title}}" />
+      {{else}}
       <input type='text' name='title' />
+      {{/if}}
     </div>
     <input type='hidden' name='_csrf' value='{{csrfToken}}' />
     <button type='button'>Cancel</button>
     <button type='submit'>Create Deck</button>
   </form>
+  </div>
 </div>

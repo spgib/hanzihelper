@@ -23,10 +23,10 @@ exports.postCreateCustomDeck = async (req, res, next) => {
   }
 
   if (duplicate !== undefined) {
-    return res.status(422).render('/dash/dash', {
+    return res.status(422).render('./dash/dash', {
       title: 'DASH',
       dash: true,
-      inputError: true,
+      startWithBackdrop: true,
       customDeckError: true,
       errorMessage: 'This title is currently unavailable!',
       oldInput: { title }

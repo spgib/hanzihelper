@@ -35,9 +35,14 @@ const formSubmissionHandler = async (e) => {
 
     window.location.replace('/dash');
   } catch (err) {
-    const errorEl = document.createElement('h3');
-    errorEl.innerHTML = err;
-    signupForm.insertBefore(errorEl, signupForm.firstChild);
+    const error = signupForm.querySelector('h3');
+    if (!error) {
+      const errorEl = document.createElement('h3');
+      errorEl.innerHTML = err;
+      signupForm.insertBefore(errorEl, signupForm.firstChild);
+    } else {
+      error.innerHTML = err;
+    }
   }
 };
 

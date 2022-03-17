@@ -92,7 +92,7 @@ exports.postLogin = async (req, res, next) => {
 
   if (user === undefined) {
     const error = new HttpError(
-      'Cannot find an account registered to this email address.'
+      'Cannot find an account registered to this email address.', 401
     );
     return next(error);
   }
@@ -106,7 +106,7 @@ exports.postLogin = async (req, res, next) => {
   }
 
   if (!isValidPassword) {
-    const error = new HttpError('Invalid password, please try again!');
+    const error = new HttpError('Invalid password, please try again!', 401);
     return next(error);
   }
 

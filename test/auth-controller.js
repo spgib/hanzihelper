@@ -31,31 +31,35 @@ describe('Auth Controller - Signup', function () {
     User.findByUsername.throws();
     await AuthController.postSignup(req, {}, next);
     expect(res).to.be.an('error');
-    expect(res).to.have.property('httpStatusCode', 500);
+    expect(res).to.have.property('code', 500);
+    expect(res).to.have.property('message', 'Something went wrong, please try again.');
     User.findByUsername.returns(undefined);
     res = null;
 
     User.findByEmail.throws();
     await AuthController.postSignup(req, {}, next);
     expect(res).to.be.an('error');
-    expect(res).to.have.property('httpStatusCode', 500);
+    expect(res).to.have.property('code', 500);
+    expect(res).to.have.property('message', 'Something went wrong, please try again.');
     User.findByEmail.returns(undefined);
     res = null;
 
     bcrypt.hash.throws();
     await AuthController.postSignup(req, {}, next);
     expect(res).to.be.an('error');
-    expect(res).to.have.property('httpStatusCode', 500);
+    expect(res).to.have.property('code', 500);
+    expect(res).to.have.property('message', 'Something went wrong, please try again.');
     bcrypt.hash.returns('abc');
     res = null;
 
     User.insert.throws();
     await AuthController.postSignup(req, {}, next);
     expect(res).to.be.an('error');
-    expect(res).to.have.property('httpStatusCode', 500);
+    expect(res).to.have.property('code', 500);
+    expect(res).to.have.property('message', 'Something went wrong, please try again.');
   });
 
-  it('should re-render page with 422 error if duplicate username or email is entered', async function () {
+  it('should forward 422 error if duplicate username or email is entered', async function () {
     const req = {
       body: {
         username: 'test',
@@ -65,24 +69,24 @@ describe('Auth Controller - Signup', function () {
       },
     };
 
-    let resStatusCode;
-    const res = {
-      status: (code) => {
-        resStatusCode = code;
-        return res;
-      },
-      render: () => {},
+    let res;
+    const next = (x) => {
+      res = x;
     };
 
     User.findByUsername.returns('duplicate');
-    await AuthController.postSignup(req, res, () => {});
-    expect(resStatusCode).to.equal(422);
+    await AuthController.postSignup(req, {}, next);
+    expect(res).to.be.an('error');
+    expect(res).to.have.property('code', 422);
+    expect(res).to.have.property('message', 'A user has already registered this username.');
     User.findByUsername.returns(undefined);
-    resStatusCode = null;
+    res = null;
 
     User.findByEmail.returns('duplicate');
-    await AuthController.postSignup(req, res, () => {});
-    expect(resStatusCode).to.equal(422);
+    await AuthController.postSignup(req, res, next);
+    expect(res).to.be.an('error');
+    expect(res).to.have.property('code', 422);
+    expect(res).to.have.property('message', 'A user has already registered an account with this email address.');
   });
 
   it('should configure session on successful signup', async function () {
@@ -138,17 +142,19 @@ describe('Auth Controller - Log in', function () {
     User.findByEmail.throws();
     await AuthController.postLogin(req, {}, next);
     expect(res).to.be.an('error');
-    expect(res).to.have.property('httpStatusCode', 500);
+    expect(res).to.have.property('code', 500);
+    expect(res).to.have.property('message', 'Something went wrong, please try again.');
     User.findByEmail.returns('abc');
     res = null;
 
     bcrypt.compare.throws();
     await AuthController.postLogin(req, {}, next);
     expect(res).to.be.an('error');
-    expect(res).to.have.property('httpStatusCode', 500);
+    expect(res).to.have.property('code', 500);
+    expect(res).to.have.property('message', 'Something went wrong, please try again.');
   });
 
-  it('should re-render page with 401 error if login credentials fail authorization', async function () {
+  it('should forward a 401 error if login credentials fail authorization', async function () {
     const req = {
       body: {
         username: 'tester',
@@ -156,24 +162,24 @@ describe('Auth Controller - Log in', function () {
       },
     };
 
-    let resCode;
-    const res = {
-      status: (code) => {
-        resCode = code;
-        return res;
-      },
-      render: () => {},
+    let res;
+    const next = (x) => {
+      res = x;
     };
 
     User.findByEmail.returns(undefined);
-    await AuthController.postLogin(req, res, () => {});
-    expect(resCode).to.equal(401);
+    await AuthController.postLogin(req, {}, next);
+    expect(res).to.be.an('error');
+    expect(res).to.have.property('code', 401);
+    expect(res).to.have.property('message', 'Cannot find an account registered to this email address.');
     User.findByEmail.returns('user');
-    resCode = null;
+    res = null;
 
     bcrypt.compare.returns(false);
-    await AuthController.postLogin(req, res, () => {});
-    expect(resCode).to.equal(401);
+    await AuthController.postLogin(req, {}, next);
+    expect(res).to.be.an('error');
+    expect(res).to.have.property('code', 401);
+    expect(res).to.have.property('message', 'Invalid password, please try again!');
   });
 
   it('should configure session on successful signup', async function () {

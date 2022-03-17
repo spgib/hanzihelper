@@ -14,7 +14,6 @@ const formSubmissionHandler = async (e) => {
   try {
     const response = await fetch('/signup', {
       method: 'POST',
-      credentials: 'same-origin',
       headers: {
         'CSRF-Token': token,
         'Content-Type': 'application/json',

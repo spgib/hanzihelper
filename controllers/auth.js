@@ -5,14 +5,7 @@ const bcrypt = require('bcrypt');
 exports.getLogin = (req, res, next) => {
   res.status(200).render('./auth/login', {
     title: 'Log In',
-    errors: false,
-    errorMessage: null,
-    oldInput: {
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
+    login: true,
   });
 };
 
@@ -78,7 +71,9 @@ exports.postSignup = async (req, res, next) => {
     req.session.user = user;
     req.session.isLoggedIn = true;
     return req.session.save((err) => {
-      console.log(err);
+      if (err) {
+        console.log(err);
+      }
       res.status(201).json({ message: 'User created!' });
     });
   }
@@ -86,47 +81,33 @@ exports.postSignup = async (req, res, next) => {
 
 exports.postLogin = async (req, res, next) => {
   const { email, password } = req.body;
-
+  console.log(password);
   let user;
   try {
     user = await User.findByEmail(email);
   } catch (err) {
-    const error = new Error(err);
-    error.httpStatusCode = 500;
+    const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
 
   if (user === undefined) {
-    return res.status(401).render('./auth/login', {
-      title: 'Sign Up',
-      errors: true,
-      errorMessage: 'Cannot find an account registered to this email address.',
-      oldInput: {
-        email,
-        password,
-      },
-    });
+    const error = new HttpError(
+      'Cannot find an account registered to this email address.'
+    );
+    return next(error);
   }
 
   let isValidPassword = false;
   try {
     isValidPassword = await bcrypt.compare(password, user.password);
   } catch (err) {
-    const error = new Error(err);
-    error.httpStatusCode = 500;
+    const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
 
   if (!isValidPassword) {
-    return res.status(401).render('./auth/login', {
-      title: 'Sign Up',
-      errors: true,
-      errorMessage: 'Invalid password, please try again!',
-      oldInput: {
-        email,
-        password,
-      },
-    });
+    const error = new HttpError('Invalid password, please try again!');
+    return next(error);
   }
 
   req.session.user = {
@@ -138,7 +119,7 @@ exports.postLogin = async (req, res, next) => {
     if (err) {
       console.log(err);
     }
-    res.redirect('/dash');
+    res.status(201).json({ message: 'Successfully logged in!' });
   });
 };
 

@@ -23,6 +23,7 @@ module.exports = () => {
   app.set('view engine', '.hbs');
   app.set('views', path.join(__dirname, 'views'));
 
+  app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   app.use(express.static(path.join(__dirname, 'public')));
 
@@ -45,7 +46,7 @@ module.exports = () => {
     res.locals.isAuthenticated = req.session.isLoggedIn;
     res.locals.csrfToken = req.csrfToken();
     next();
-  })
+  });
 
   app.use(authRoutes);
   app.use(dashboardRoutes);
@@ -54,8 +55,8 @@ module.exports = () => {
   app.use(errorController.get404);
 
   app.use((error, req, res, next) => {
-    console.log(error);
-    res.redirect('/500');
+    res.status(error.code || 500);
+    res.json({ message: error.message || 'An unknown error occurred.' });
   });
 
   return app;

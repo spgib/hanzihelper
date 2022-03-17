@@ -5,8 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{csrfToken}}">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="/css/main.css">
+    {{#if signup }}
+      <script type="text/javascript" src="/js/signup.js" defer></script>
+    {{/if}}
     {{#if dash }}
       <link rel="stylesheet" href="/css/dash.css">
       <script type="text/javascript" src="/js/dash.js" defer></script>

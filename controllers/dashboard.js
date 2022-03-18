@@ -1,5 +1,6 @@
 const Deck = require('../models/deck');
 const UserDeck = require('../models/user-deck');
+const HttpError = require('../models/http-error');
 
 exports.getIndex = (req, res, next) => {
   if (req.session.isLoggedIn) {
@@ -28,33 +29,20 @@ exports.postCreateCustomDeck = async (req, res, next) => {
   try {
     duplicate = await Deck.findByTitle(title);
   } catch (err) {
-    const error = new Error(err);
-    error.httpStatusCode = 500;
+    const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
 
   if (duplicate !== undefined) {
-    req.flash('startWithBackdrop', true);
-    req.flash('customDeckError', true);
-    req.flash('errorMessage', 'This title is currently unavailable!');
-    req.flash('oldInput', { title: title });
-    // return res.status(422).render('./dash/dash', {
-    //   title: 'DASH',
-    //   dash: true,
-    //   startWithBackdrop: true,
-    //   customDeckError: true,
-    //   errorMessage: 'This title is currently unavailable!',
-    //   oldInput: { title },
-    // });
-    return res.status(422).redirect('/dash');
+    const error = new HttpError('A deck already exists with this title!', 422);
+    return next(error);
   }
 
   let deck, userDeck;
   try {
     deck = await Deck.insert(title, userId);
   } catch (err) {
-    const error = new Error(err);
-    error.httpStatusCode = 500;
+    const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
 
@@ -62,11 +50,12 @@ exports.postCreateCustomDeck = async (req, res, next) => {
     try {
       userDeck = await UserDeck.insert(userId, deck.id);
     } catch (err) {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
       return next(error);
     }
   }
-
-  res.redirect('/dash');
+  res.status(201).json({ message: 'Deck successfully created!' });
 };

@@ -1,11 +1,8 @@
 const dashActionBtn = document.querySelector('.dash__action-list button');
 const addDeckBtn = document.querySelectorAll('.dash__action-list button')[1];
 const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
-const customDeckForm = document.querySelector('.custom-deck-form');
-const customDeckCancelBtn = document.querySelector('.custom-deck-form button');
 const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
 const backdrop = document.querySelector('.backdrop');
-const modal = document.querySelector('.modal');
 
 const fetchHttp = async (url, method, body, form) => {
   try {
@@ -70,17 +67,8 @@ const closeDashActionItems = (items) => {
 
 const closeModal = () => {
   backdrop.classList.add('hidden');
-  const content = modal.firstElementChild;
-  const errorEl = content.querySelector('h3');
-  if (errorEl) {
-    errorEl.remove();
-  }
-  const inputs = content.querySelectorAll('input');
-  inputs.forEach((i) => {
-    i.value = '';
-  });
-  const contentDiv = document.querySelector('.dash__modal-content');
-  contentDiv.append(content);
+  const content = backdrop.firstElementChild;
+  content.remove();
 };
 
 const backdropClickHandler = function (e) {
@@ -90,8 +78,13 @@ const backdropClickHandler = function (e) {
 };
 
 const openCustomDeckHandler = () => {
-  const customDeckModal = document.querySelector('.custom-deck-modal');
-  modal.append(customDeckModal);
+  const template = document.querySelector('#custom-deck-template');
+  const clone = template.content.firstElementChild.cloneNode(true);
+
+  clone.querySelector('button').addEventListener('click', customDeckCancelHandler);
+  clone.querySelector('form').addEventListener('submit', customDeckFormSubmissionHandler);
+
+  backdrop.append(clone);
   backdrop.classList.remove('hidden');
 };
 
@@ -108,19 +101,10 @@ const customDeckFormSubmissionHandler = async (e) => {
 
   const message = await fetchHttp('/dash/custom', 'POST', body, e.target);
   if (message) {
+    dashActionBtn.click();
     addDeckToList(title);
     httpMessageAlert(message);
   }
-};
-
-const httpMessageAlert = (message) => {
-  const alert = document.createElement('div');
-  alert.classList.add('alert');
-  alert.innerHTML = `<h3>${message}</h3>`;
-  document.body.append(alert);
-  setTimeout(() => {
-    alert.remove();
-  }, 2500);
 };
 
 const addDeckToList = (title) => {
@@ -129,11 +113,8 @@ const addDeckToList = (title) => {
   const markup = `
   <li class='decks__item'>
   <button class='decks__item-main'>
-    <h3>${title}</h3>
+  <h3>${title}</h3>
   </button>
-  <div class='decks__item-info'>
-    <p></p>
-  </div>
   </li>
   `;
   if (!decksList) {
@@ -147,8 +128,16 @@ const addDeckToList = (title) => {
   }
 };
 
+const httpMessageAlert = (message) => {
+  const alert = document.createElement('div');
+  alert.classList.add('alert');
+  alert.innerHTML = `<h3>${message}</h3>`;
+  document.body.append(alert);
+  setTimeout(() => {
+    alert.remove();
+  }, 2500);
+};
+
 backdrop.addEventListener('click', backdropClickHandler);
 dashActionBtn.addEventListener('click', actionItemsHandler);
 customDeckBtn.addEventListener('click', openCustomDeckHandler);
-customDeckCancelBtn.addEventListener('click', customDeckCancelHandler);
-customDeckForm.addEventListener('submit', customDeckFormSubmissionHandler);

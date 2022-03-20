@@ -10,10 +10,10 @@
           <li class='decks__item'>
             <button class='decks__item-main'>
               <h3>{{this.title}}</h3>
+              <p>To revise: 0</p>
+              <p>To refresh: 0</p>
+              <p>To learn: 0</p>
             </button>
-            <div class='decks__item-info'>
-              <p>{{this.description}}</p>
-            </div>
           </li>
         {{/each}}
       </ul>
@@ -33,8 +33,9 @@
       <button type='button'>Add card</button>
     </li>
   </ul>
-  <div class='dash__modal-content hidden'>
-    <div class='custom-deck-modal'>
+
+  <template id="custom-deck-template">
+    <div class='modal'>
       <form class='custom-deck-form'>
         <div class='form-control'>
           <label for='title'>Deck Title</label>
@@ -44,5 +45,6 @@
         <button type='submit'>Create Deck</button>
       </form>
     </div>
-  </div>
+  </template>
+  
 </main>

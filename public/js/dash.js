@@ -101,12 +101,16 @@ const customDeckCancelHandler = () => {
 
 const customDeckFormSubmissionHandler = async (e) => {
   e.preventDefault();
+  const title = e.target[0].value;
   const body = {
-    title: e.target[0].value,
+    title,
   };
 
   const message = await fetchHttp('/dash/custom', 'POST', body, e.target);
-  httpMessageAlert(message);
+  if (message) {
+    addDeckToList(title);
+    httpMessageAlert(message);
+  }
 };
 
 const httpMessageAlert = (message) => {
@@ -117,6 +121,30 @@ const httpMessageAlert = (message) => {
   setTimeout(() => {
     alert.remove();
   }, 2500);
+};
+
+const addDeckToList = (title) => {
+  const decksContainer = document.querySelector('.dash__decks');
+  const decksList = decksContainer.querySelector('ul');
+  const markup = `
+  <li class='decks__item'>
+  <button class='decks__item-main'>
+    <h3>${title}</h3>
+  </button>
+  <div class='decks__item-info'>
+    <p></p>
+  </div>
+  </li>
+  `;
+  if (!decksList) {
+    decksContainer.firstElementChild.remove();
+    const ul = document.createElement('ul');
+    ul.classList.add('decks__list');
+    ul.innerHTML = markup;
+    decksContainer.append(ul);
+  } else {
+    decksList.innerHTML = decksList.innerHTML + markup;
+  }
 };
 
 backdrop.addEventListener('click', backdropClickHandler);

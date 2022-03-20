@@ -10,14 +10,22 @@ exports.getIndex = (req, res, next) => {
   res.render('index', { title: '你好' });
 };
 
-exports.getDashboard = (req, res, next) => {
+exports.getDashboard = async (req, res, next) => {
+  const userId = req.session.user.id;
+
+  let decks;
+  try {
+    decks = await UserDeck.findByUser(userId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again', 500);
+    return next(error);
+  }
+
   res.render('./dash/dash', {
     title: 'DASH',
     dash: true,
-    startWithBackdrop: req.flash('startWithBackdrop'),
-    customDeckError: req.flash('customDeckError'),
-    errorMessage: req.flash('errorMessage'),
-    oldInput: req.flash('oldInput'),
+    noDecks: decks.length === 0,
+    decks: decks
   });
 };
 

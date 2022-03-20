@@ -20,6 +20,18 @@ class UserDeck {
 
     return parsedRows[0];
   }
+
+  static async findByUser(userId) {
+    const {rows} = await pool.query(`
+      SELECT title, description
+      FROM decks
+      JOIN user_decks ON decks.id = user_decks.deck_id
+      JOIN users ON user_decks.user_id = users.id
+      WHERE users.id = $1;
+    `, [userId]);
+
+    return rows;
+  }
 };
 
 module.exports = UserDeck;

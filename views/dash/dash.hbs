@@ -1,6 +1,24 @@
 <main>
   <h1>Hanzi Helper Dashboard</h1>
-
+  <div class='dash__decks'>
+    {{#if noDecks}}
+      <h3>You don't have any desks! Add an existing deck or create one of your
+        own!</h3>
+    {{else}}
+      <ul class='decks__list'>
+        {{#each decks}}
+          <li class='decks__item'>
+            <button class='decks__item-main'>
+              <h3>{{this.title}}</h3>
+            </button>
+            <div class='decks__item-info'>
+              <p>{{this.description}}</p>
+            </div>
+          </li>
+        {{/each}}
+      </ul>
+    {{/if}}
+  </div>
   <ul class='dash__action-list'>
     <li class='dash__action-item'>
       <button type='button'>ADD</button>

@@ -25,7 +25,12 @@ exports.getDashboard = async (req, res, next) => {
     title: 'DASH',
     dash: true,
     noDecks: decks.length === 0,
-    decks: decks
+    decks: decks,
+    withTemplates: true,
+    templates: ['custom-deck'],
+    helpers: {
+      temp(x) { return 'templates/' + x }
+    }
   });
 };
 

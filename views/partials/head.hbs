@@ -18,4 +18,9 @@
       <link rel="stylesheet" href="/css/dash.css">
       <script type="text/javascript" src="/js/dash.js" defer></script>
     {{/if}}
+    {{#if withTemplates}}
+      {{#each templates}}
+        {{> (temp this) }}
+      {{/each}}
+    {{/if}}
   </head>

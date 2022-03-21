@@ -2,7 +2,7 @@ const dashActionBtn = document.querySelector('.dash__action-list button');
 const addDeckBtn = document.querySelectorAll('.dash__action-list button')[1];
 const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
 const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
-const backdrop = document.querySelector('.backdrop');
+// const backdrop = document.querySelector('.backdrop');
 
 const fetchHttp = async (url, method, body, form) => {
   try {
@@ -66,9 +66,11 @@ const closeDashActionItems = (items) => {
 };
 
 const closeModal = () => {
-  backdrop.classList.add('hidden');
-  const content = backdrop.firstElementChild;
-  content.remove();
+  // backdrop.classList.add('hidden');
+  // const content = backdrop.firstElementChild;
+  // content.remove();
+  const backdrop = document.querySelector('.backdrop');
+  backdrop.remove();
 };
 
 const backdropClickHandler = function (e) {
@@ -84,8 +86,13 @@ const openCustomDeckHandler = () => {
   clone.querySelector('button').addEventListener('click', customDeckCancelHandler);
   clone.querySelector('form').addEventListener('submit', customDeckFormSubmissionHandler);
 
+  // backdrop.append(clone);
+  // backdrop.classList.remove('hidden');
+  const backdrop = document.createElement('div');
+  backdrop.classList.add('backdrop');
   backdrop.append(clone);
-  backdrop.classList.remove('hidden');
+  document.body.insertBefore(backdrop, document.body.firstChild);
+  backdrop.addEventListener('click', backdropClickHandler);
 };
 
 const customDeckCancelHandler = () => {
@@ -138,6 +145,6 @@ const httpMessageAlert = (message) => {
   }, 2500);
 };
 
-backdrop.addEventListener('click', backdropClickHandler);
+// backdrop.addEventListener('click', backdropClickHandler);
 dashActionBtn.addEventListener('click', actionItemsHandler);
 customDeckBtn.addEventListener('click', openCustomDeckHandler);

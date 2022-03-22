@@ -20,7 +20,7 @@ exports.getDashboard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again', 500);
     return next(error);
   }
-
+  
   res.render('./dash/dash', {
     title: 'DASH',
     dash: true,

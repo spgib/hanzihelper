@@ -3,6 +3,7 @@ const addDeckBtn = document.querySelectorAll('.dash__action-list button')[1];
 const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
 const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
 const tabLinks = document.querySelectorAll('.tab-link');
+const collapsibles = document.querySelectorAll('.collapsible');
 
 const fetchHttp = async (url, method, body, form) => {
   try {
@@ -44,17 +45,21 @@ const tabHandler = (tab, e) => {
   const activeTab = document.getElementById(tab);
   
   tabs.forEach(tab => {
-    if (tab.classList.contains('tab-content--hidden')) return;
-    tab.classList.add('tab-content--hidden');
+    if (tab.classList.contains('hidden')) return;
+    tab.classList.add('hidden');
   });
 
   tabLinks.forEach(tabLink => {
     tabLink.classList.remove('active');
   });
 
-  activeTab.classList.remove('tab-content--hidden');
+  activeTab.classList.remove('hidden');
   e.target.classList.add('active');
 };
+
+const collapsibleHandler = (e) => {
+  e.target.nextElementSibling.classList.toggle('hidden');
+}
 
 const actionItemsHandler = () => {
   const hidden = document.querySelector('.dash__action-list > .hidden');
@@ -157,6 +162,7 @@ const httpMessageAlert = (message) => {
   }, 2500);
 };
 
+collapsibles.forEach(collapsible => collapsible.addEventListener('click', collapsibleHandler));
 dashActionBtn.addEventListener('click', actionItemsHandler);
 customDeckBtn.addEventListener('click', openCustomDeckHandler);
 tabLinks[0].addEventListener('click', tabHandler.bind(this, 'learn-tab'));

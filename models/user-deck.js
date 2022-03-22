@@ -9,7 +9,7 @@ class UserDeck {
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       deck_id INTEGER NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    )
+    );
     `);
   }
 

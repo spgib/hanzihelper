@@ -2,6 +2,7 @@ const dashActionBtn = document.querySelector('.dash__action-list button');
 const addDeckBtn = document.querySelectorAll('.dash__action-list button')[1];
 const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
 const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
+const tabLinks = document.querySelectorAll('.tab-link');
 
 const fetchHttp = async (url, method, body, form) => {
   try {
@@ -36,6 +37,25 @@ const fetchHttp = async (url, method, body, form) => {
       form.insertBefore(errorEl, form.firstChild);
     }
   }
+};
+
+const tabHandler = (tab, e) => {
+  const tabs = document.querySelectorAll('.tab-content');
+  const learnContent = tabs[0];
+  const infoContent = tabs[1];
+  const hide = tab === 'learn' ? infoContent : learnContent;
+  const show = tab === 'learn' ? learnContent : infoContent;
+
+  hide.classList.add('tab-content-hide');
+  hide.classList.remove('tab-content-show');
+  show.classList.add('tab-content-show');
+  show.classList.remove('tab-content-hide');
+
+  tabLinks.forEach(tabLink => {
+    tabLink.classList.remove('active');
+  });
+
+  e.target.classList.add('active');
 };
 
 const actionItemsHandler = () => {
@@ -141,3 +161,6 @@ const httpMessageAlert = (message) => {
 
 dashActionBtn.addEventListener('click', actionItemsHandler);
 customDeckBtn.addEventListener('click', openCustomDeckHandler);
+tabLinks[0].addEventListener('click', tabHandler.bind(this, 'learn'));
+tabLinks[1].addEventListener('click', tabHandler.bind(this, 'info'));
+tabLinks[0].click();

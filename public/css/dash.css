@@ -1,3 +1,11 @@
+.tab-content-show {
+  display: block;
+}
+
+.tab-content-hide {
+  display: none;
+}
+
 .custom-deck-form {
   z-index: 20;
 }

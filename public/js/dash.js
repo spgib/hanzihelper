@@ -41,20 +41,18 @@ const fetchHttp = async (url, method, body, form) => {
 
 const tabHandler = (tab, e) => {
   const tabs = document.querySelectorAll('.tab-content');
-  const learnContent = tabs[0];
-  const infoContent = tabs[1];
-  const hide = tab === 'learn' ? infoContent : learnContent;
-  const show = tab === 'learn' ? learnContent : infoContent;
-
-  hide.classList.add('tab-content-hide');
-  hide.classList.remove('tab-content-show');
-  show.classList.add('tab-content-show');
-  show.classList.remove('tab-content-hide');
+  const activeTab = document.getElementById(tab);
+  
+  tabs.forEach(tab => {
+    if (tab.classList.contains('tab-content--hidden')) return;
+    tab.classList.add('tab-content--hidden');
+  });
 
   tabLinks.forEach(tabLink => {
     tabLink.classList.remove('active');
   });
 
+  activeTab.classList.remove('tab-content--hidden');
   e.target.classList.add('active');
 };
 
@@ -161,6 +159,6 @@ const httpMessageAlert = (message) => {
 
 dashActionBtn.addEventListener('click', actionItemsHandler);
 customDeckBtn.addEventListener('click', openCustomDeckHandler);
-tabLinks[0].addEventListener('click', tabHandler.bind(this, 'learn'));
-tabLinks[1].addEventListener('click', tabHandler.bind(this, 'info'));
+tabLinks[0].addEventListener('click', tabHandler.bind(this, 'learn-tab'));
+tabLinks[1].addEventListener('click', tabHandler.bind(this, 'info-tab'));
 tabLinks[0].click();

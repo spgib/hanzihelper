@@ -1,8 +1,8 @@
-.tab-content-show {
+.tab-content {
   display: block;
 }
 
-.tab-content-hide {
+.tab-content--hidden {
   display: none;
 }
 

@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="/css/main.css">
     {{#if withTemplates}}
       {{#each templates}}
-        {{> (temp this) }}
+        {{> (temp this) decks=../decks noDecks=../noDecks}}
       {{/each}}
     {{/if}}
   </head>

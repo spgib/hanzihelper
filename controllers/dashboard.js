@@ -27,7 +27,7 @@ exports.getDashboard = async (req, res, next) => {
     noDecks: decks.length === 0,
     decks: decks,
     withTemplates: true,
-    templates: ['custom-deck'],
+    templates: ['custom-deck', 'add-card'],
     helpers: {
       temp(x) { return 'templates/' + x }
     }

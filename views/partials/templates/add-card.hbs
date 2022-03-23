@@ -1,0 +1,32 @@
+<template id='add-card-template'>
+  <div class='modal'>
+    <form class='add-card-form'>
+      <div class='form-control'>
+        <label for='decks'>Deck:</label>
+        <select name='decks'>
+          {{#if noDecks}}
+          <option value="">You don't have any decks!</option>
+          {{else}}
+            {{#each decks}}
+              <option value="{{this.title}}">{{this.title}}</option>
+            {{/each}}
+          {{/if}}
+        </select>
+      </div>
+      <div class='form-control'>
+        <label for='hanzi'>Hanzi</label>
+        <input type='text' name='hanzi' />
+      </div>
+      <div class='form-control'>
+        <label for='pinyin'>Pinyin</label>
+        <input type='text' name='pinyin' />
+      </div>
+      <div class='form-control'>
+        <label for='meaning'>English meaning</label>
+        <input type='text' name='meaning' />
+      </div>
+      <button type="button">Cancel</button>
+      <button type="submit">Create Card</button>
+    </form>
+  </div>
+</template>

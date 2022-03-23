@@ -43,13 +43,13 @@ const fetchHttp = async (url, method, body, form) => {
 const tabHandler = (tab, e) => {
   const tabs = document.querySelectorAll('.tab-content');
   const activeTab = document.getElementById(tab);
-  
-  tabs.forEach(tab => {
+
+  tabs.forEach((tab) => {
     if (tab.classList.contains('hidden')) return;
     tab.classList.add('hidden');
   });
 
-  tabLinks.forEach(tabLink => {
+  tabLinks.forEach((tabLink) => {
     tabLink.classList.remove('active');
   });
 
@@ -59,7 +59,7 @@ const tabHandler = (tab, e) => {
 
 const collapsibleHandler = (e) => {
   e.target.nextElementSibling.classList.toggle('hidden');
-}
+};
 
 const actionItemsHandler = () => {
   const hidden = document.querySelector('.dash__action-list > .hidden');
@@ -92,6 +92,14 @@ const closeModal = () => {
   backdrop.remove();
 };
 
+const createBackdrop = (content) => {
+  const backdrop = document.createElement('div');
+  backdrop.classList.add('backdrop');
+  backdrop.append(content);
+  document.body.insertBefore(backdrop, document.body.firstChild);
+  backdrop.addEventListener('click', backdropClickHandler);
+};
+
 const backdropClickHandler = function (e) {
   if (this === e.target) {
     closeModal();
@@ -102,18 +110,12 @@ const openCustomDeckHandler = () => {
   const template = document.querySelector('#custom-deck-template');
   const clone = template.content.firstElementChild.cloneNode(true);
 
-  clone.querySelector('button').addEventListener('click', customDeckCancelHandler);
-  clone.querySelector('form').addEventListener('submit', customDeckFormSubmissionHandler);
+  clone.querySelector('button').addEventListener('click', modalCancelHandler);
+  clone
+    .querySelector('form')
+    .addEventListener('submit', customDeckFormSubmissionHandler);
 
-  const backdrop = document.createElement('div');
-  backdrop.classList.add('backdrop');
-  backdrop.append(clone);
-  document.body.insertBefore(backdrop, document.body.firstChild);
-  backdrop.addEventListener('click', backdropClickHandler);
-};
-
-const customDeckCancelHandler = () => {
-  closeModal();
+  createBackdrop(clone);
 };
 
 const customDeckFormSubmissionHandler = async (e) => {
@@ -129,6 +131,24 @@ const customDeckFormSubmissionHandler = async (e) => {
     addDeckToList(title);
     httpMessageAlert(message);
   }
+};
+
+const openAddCardHandler = () => {
+  const template = document.getElementById('add-card-template');
+  const clone = template.content.firstElementChild.cloneNode(true);
+
+  clone.querySelector('button').addEventListener('click', modalCancelHandler);
+  clone
+    .querySelector('form')
+    .addEventListener('submit', addCardFormSubmissionHandler);
+
+  createBackdrop(clone);
+};
+
+const addCardFormSubmissionHandler = () => {};
+
+const modalCancelHandler = () => {
+  closeModal();
 };
 
 const addDeckToList = (title) => {
@@ -162,9 +182,12 @@ const httpMessageAlert = (message) => {
   }, 2500);
 };
 
-collapsibles.forEach(collapsible => collapsible.addEventListener('click', collapsibleHandler));
+collapsibles.forEach((collapsible) =>
+  collapsible.addEventListener('click', collapsibleHandler)
+);
 dashActionBtn.addEventListener('click', actionItemsHandler);
 customDeckBtn.addEventListener('click', openCustomDeckHandler);
+addCardBtn.addEventListener('click', openAddCardHandler);
 tabLinks[0].addEventListener('click', tabHandler.bind(this, 'learn-tab'));
 tabLinks[1].addEventListener('click', tabHandler.bind(this, 'info-tab'));
 tabLinks[0].click();

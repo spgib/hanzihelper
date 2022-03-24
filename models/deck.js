@@ -2,8 +2,8 @@ const pool = require('../db/pool');
 const toCamelCase = require('../db/utils/to-camel-case');
 
 class Deck {
-  static init() {
-    pool.query(`
+  static async init() {
+    await pool.query(`
     CREATE TABLE IF NOT EXISTS decks (
       id SERIAL PRIMARY KEY,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,

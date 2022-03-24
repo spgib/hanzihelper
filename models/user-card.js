@@ -1,8 +1,8 @@
 const pool = require('../db/pool');
 
 class UserCard {
-  static init() {
-    pool.query(`
+  static async init() {
+    await pool.query(`
       CREATE TABLE IF NOT EXISTS user_cards (
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

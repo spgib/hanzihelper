@@ -132,7 +132,28 @@ const openAddCardHandler = () => {
   createBackdrop(clone);
 };
 
-const addCardFormSubmissionHandler = () => {};
+const addCardFormSubmissionHandler = async (e) => {
+  e.preventDefault();
+  const deck = e.target[0].value;
+  const hanzi = e.target[1].value;
+  const pinyin = e.target[2].value;
+  const meaning = e.target[3].value;
+  body = {
+    deck,
+    hanzi,
+    pinyin,
+    meaning
+  };
+
+  const message = await fetchHttp('/dash/addcard', 'POST', body, e.target);
+  if (message) {
+    const inputs = e.querySelectorAll('input');
+    for (let input of inputs) {
+      input.value = '';
+    }
+    httpMessageAlert(message);
+  }
+};
 
 const modalCancelHandler = () => {
   closeModal();

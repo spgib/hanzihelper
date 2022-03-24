@@ -72,3 +72,13 @@ exports.postCreateCustomDeck = async (req, res, next) => {
   }
   res.status(201).json({ message: 'Deck successfully created!' });
 };
+
+exports.postAddCard = async (req, res, next) => {
+  const { deckId, hanzi, pinyin, meaning } = req.body;
+  const userId = req.session.user.id;
+
+  // Check whether user has admin rights on deck
+  // Check whether there is a duplicate card already in deck
+  // Create a card entry
+  // Create a userCard entry
+}

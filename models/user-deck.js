@@ -2,8 +2,8 @@ const pool = require('../db/pool');
 const toCamelCase = require('../db/utils/to-camel-case');
 
 class UserDeck {
-  static init() {
-    pool.query(`
+  static async init() {
+    await pool.query(`
     CREATE TABLE IF NOT EXISTS user_decks (
       id SERIAL PRIMARY KEY,
       user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -23,7 +23,7 @@ class UserDeck {
 
   static async findByUser(userId) {
     const {rows} = await pool.query(`
-      SELECT title, description, user_decks.created_at
+      SELECT title, description, user_decks.created_at, decks.id
       FROM decks
       JOIN user_decks ON decks.id = user_decks.deck_id
       JOIN users ON user_decks.user_id = users.id

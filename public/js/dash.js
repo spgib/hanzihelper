@@ -62,30 +62,17 @@ const collapsibleHandler = (e) => {
 };
 
 const actionItemsHandler = () => {
-  const hidden = document.querySelector('.dash__action-list > .hidden');
   const items = document.querySelectorAll('.dash__action-item');
-  if (hidden) {
-    openDashActionItems(items);
-  } else {
-    closeDashActionItems(items);
-  }
+  toggleDashActionItems(items);
 };
 
-const openDashActionItems = (items) => {
+const toggleDashActionItems = (items) => {
   items.forEach((item, index) => {
     if (index === 0) return;
 
-    item.classList.remove('hidden');
+    item.classList.toggle('hidden');
   });
-};
-
-const closeDashActionItems = (items) => {
-  items.forEach((item, index) => {
-    if (index === 0) return;
-
-    item.classList.add('hidden');
-  });
-};
+}
 
 const closeModal = () => {
   const backdrop = document.querySelector('.backdrop');
@@ -190,4 +177,5 @@ customDeckBtn.addEventListener('click', openCustomDeckHandler);
 addCardBtn.addEventListener('click', openAddCardHandler);
 tabLinks[0].addEventListener('click', tabHandler.bind(this, 'learn-tab'));
 tabLinks[1].addEventListener('click', tabHandler.bind(this, 'info-tab'));
+
 tabLinks[0].click();

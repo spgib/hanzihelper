@@ -24,6 +24,14 @@ class Deck {
     return rows[0];
   }
 
+  static async findById(id) {
+    const { rows } = await pool.query(`SELECT * FROM decks WHERE id = $1`, [id]);
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
   static async insert(title, creatorId) {
     const { rows } = await pool.query(
       `INSERT INTO decks (title, creator_id) VALUES ($1, $2) RETURNING *;`,

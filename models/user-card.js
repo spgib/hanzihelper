@@ -1,4 +1,5 @@
 const pool = require('../db/pool');
+const toCamelCase = require('../db/utils/to-camel-case');
 
 class UserCard {
   static async init() {
@@ -7,12 +8,22 @@ class UserCard {
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
-        deck_id INTEGER NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
         first_learned TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
         last_reviewed TIMESTAMP WITH TIME ZONE,
         learning_level INTEGER DEFAULT 1
       );
     `);
+  }
+
+  static async insert(userId, cardId) {
+    const { rows } = await pool.query(
+      `INSERT INTO user_cards (user_id, card_id) VALUES ($1, $2) RETURNING *;`,
+      [userId, cardId]
+    );
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
   }
 }
 

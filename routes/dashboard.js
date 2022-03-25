@@ -11,4 +11,6 @@ router.get('/dash', authCheck, dashboardController.getDashboard);
 
 router.post('/dash/custom', authCheck, dashboardController.postCreateCustomDeck);
 
+router.post('/dash/addCard', authCheck, dashboardController.postAddCard);
+
 module.exports = router;

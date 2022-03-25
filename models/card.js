@@ -1,4 +1,5 @@
 const pool = require('../db/pool');
+const toCamelCase = require('../db/utils/to-camel-case');
 
 class Card {
   static async init() {
@@ -8,9 +9,38 @@ class Card {
         hanzi VARCHAR(50) NOT NULL,
         pinyin VARCHAR(100) NOT NULL,
         meaning VARCHAR(100) NOT NULL,
+        deck_id INTEGER NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
-    `)
+    `);
+  }
+
+  static async findCardsFromDeckId(deckId) {
+    const { rows } = await pool.query(
+      `SELECT id, hanzi FROM cards WHERE deck_id = $1;`,
+      [deckId]
+    );
+
+    return rows;
+  }
+
+  static async insert(hanzi, pinyin, meaning, deckId) {
+    const { rows } = await pool.query(
+      `INSERT INTO cards (hanzi, pinyin, meaning, deck_id) VALUES ($1, $2, $3, $4) RETURNING *;`,
+      [hanzi, pinyin, meaning, deckId]
+    );
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
+  static async delete(id) {
+    const {rows} = await pool.query(`DELETE FROM cards WHERE id = $1 RETURNING *;`, [id]);
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
   }
 }
 

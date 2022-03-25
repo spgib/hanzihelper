@@ -1,6 +1,8 @@
 const Deck = require('../models/deck');
 const UserDeck = require('../models/user-deck');
 const HttpError = require('../models/http-error');
+const Card = require('../models/card');
+const UserCard = require('../models/user-card');
 
 exports.getIndex = (req, res, next) => {
   if (req.session.isLoggedIn) {
@@ -20,7 +22,7 @@ exports.getDashboard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again', 500);
     return next(error);
   }
-  
+
   res.render('./dash/dash', {
     title: 'DASH',
     dash: true,
@@ -29,8 +31,10 @@ exports.getDashboard = async (req, res, next) => {
     withTemplates: true,
     templates: ['custom-deck', 'add-card'],
     helpers: {
-      temp(x) { return 'templates/' + x }
-    }
+      temp(x) {
+        return 'templates/' + x;
+      },
+    },
   });
 };
 
@@ -76,9 +80,83 @@ exports.postCreateCustomDeck = async (req, res, next) => {
 exports.postAddCard = async (req, res, next) => {
   const { deckId, hanzi, pinyin, meaning } = req.body;
   const userId = req.session.user.id;
+ 
+  let deck;
+  try {
+    deck = await Deck.findById(deckId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
 
+  if (deck === undefined) {
+    const error = new HttpError('Deck could not be found.', 422);
+    return next(error);
+  }
+  
   // Check whether user has admin rights on deck
+  if (deck.creatorId !== userId) {
+    const error = new HttpError(
+      'User does not have permission to modify this deck.',
+      401
+    );
+    return next(error);
+  }
+
   // Check whether there is a duplicate card already in deck
-  // Create a card entry
+  let duplicate;
+  try {
+    const deckCards = await Card.findCardsFromDeckId(deckId);
+    duplicate = deckCards.filter((card) => card.hanzi === hanzi);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+  if (duplicate.length !== 0) {
+    const error = new HttpError(
+      'A card for this hanzi already exists in this deck.',
+      403
+      );
+      return next(error);
+    }
+    
+    // Create a card entry
+    let card;
+    try {
+      card = await Card.insert(hanzi, pinyin, meaning, deck.id);
+    } catch (err) {
+      const error = new HttpError('Something went wrong, please try again.', 500);
+      return next(error);
+    }
+    
+  if (!card.id) {
+    const error = new HttpError('Failed to save card, please try again.', 500);
+    return next(error);
+  }
+
   // Create a userCard entry
-}
+  let userCard;
+  try {
+    userCard = await UserCard.insert(userId, card.id);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  if (!userCard.id) {
+    const error = new HttpError('Failed to save card, please try again.', 500);
+    let cleanup;
+    try {
+      cleanup = await Card.delete(card.id);
+    } catch (err) {
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
+      return next(error);
+    }
+    return next(error);
+  }
+
+  return res.status(201).json({message: 'Card created!'});
+};

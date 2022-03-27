@@ -147,7 +147,7 @@ const addCardFormSubmissionHandler = async (e) => {
   
   const message = await fetchHttp('/dash/addcard', 'POST', body, e.target);
   if (message) {
-    const inputs = e.querySelectorAll('input');
+    const inputs = e.target.querySelectorAll('input');
     for (let input of inputs) {
       input.value = '';
     }

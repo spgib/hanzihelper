@@ -24,19 +24,38 @@ class Card {
     return rows;
   }
 
-  static async insert(hanzi, pinyin, meaning, deckId) {
-    const { rows } = await pool.query(
-      `INSERT INTO cards (hanzi, pinyin, meaning, deck_id) VALUES ($1, $2, $3, $4) RETURNING *;`,
-      [hanzi, pinyin, meaning, deckId]
-    );
-
-    const parsedRows = toCamelCase(rows);
-
-    return parsedRows[0];
+  static async insert(hanzi, pinyin, meaning, deckId, userId) {
+    const client = await pool.transactionClient();
+    let parsedRows;
+    
+    try {
+      await client.query('BEGIN;');
+      const { rows: card } = await client.query(
+        `INSERT INTO cards (hanzi, pinyin, meaning, deck_id) VALUES ($1, $2, $3, $4) RETURNING id;`,
+        [hanzi, pinyin, meaning, deckId]
+      );
+      
+      const { rows } = await client.query(
+        `INSERT INTO user_cards (user_id, card_id) VALUES ($1, $2) RETURNING *;`,
+        [userId, card[0].id]
+      );
+      
+      parsedRows = toCamelCase(rows);
+      await client.query('COMMIT;');
+    } catch (err) {
+      await client.query('ROLLBACK;');
+      throw err;
+    } finally {
+      client.release();
+      return parsedRows[0];
+    }
   }
 
   static async delete(id) {
-    const {rows} = await pool.query(`DELETE FROM cards WHERE id = $1 RETURNING *;`, [id]);
+    const { rows } = await pool.query(
+      `DELETE FROM cards WHERE id = $1 RETURNING *;`,
+      [id]
+    );
 
     const parsedRows = toCamelCase(rows);
 

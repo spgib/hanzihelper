@@ -30,6 +30,10 @@ class Pool {
   query(sql, params) {
     return this._pool.query(sql, params);
   }
+
+  async transactionClient() {
+    return await this._pool.connect();
+  }
 }
 
 const pool = new Pool();

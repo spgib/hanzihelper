@@ -10,6 +10,7 @@ class Card {
         pinyin VARCHAR(100) NOT NULL,
         meaning VARCHAR(100) NOT NULL,
         deck_id INTEGER NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+        creator_id INTEGER NOT NULL REFERENCES users(id) ON DELETE SET NULL,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -27,19 +28,19 @@ class Card {
   static async insert(hanzi, pinyin, meaning, deckId, userId) {
     const client = await pool.transactionClient();
     let parsedRows;
-    
+
     try {
       await client.query('BEGIN;');
-      const { rows: card } = await client.query(
-        `INSERT INTO cards (hanzi, pinyin, meaning, deck_id) VALUES ($1, $2, $3, $4) RETURNING id;`,
-        [hanzi, pinyin, meaning, deckId]
+      const { rows: cards } = await client.query(
+        `INSERT INTO cards (hanzi, pinyin, meaning, deck_id, creator_id) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
+        [hanzi, pinyin, meaning, deckId, userId]
       );
-      
+
       const { rows } = await client.query(
         `INSERT INTO user_cards (user_id, card_id) VALUES ($1, $2) RETURNING *;`,
-        [userId, card[0].id]
+        [userId, cards[0].id]
       );
-      
+
       parsedRows = toCamelCase(rows);
       await client.query('COMMIT;');
     } catch (err) {
@@ -47,8 +48,8 @@ class Card {
       throw err;
     } finally {
       client.release();
-      return parsedRows[0];
     }
+    return parsedRows[0];
   }
 
   static async delete(id) {

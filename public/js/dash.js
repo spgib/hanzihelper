@@ -26,7 +26,6 @@ const fetchHttp = async (url, method, body, form) => {
       throw new Error(responseData.message);
     }
 
-    closeModal();
     return responseData.message;
   } catch (err) {
     const error = form.querySelector('h3');
@@ -114,6 +113,7 @@ const customDeckFormSubmissionHandler = async (e) => {
 
   const message = await fetchHttp('/dash/custom', 'POST', body, e.target);
   if (message) {
+    closeModal();
     dashActionBtn.click();
     addDeckToList(title);
     httpMessageAlert(message);
@@ -148,6 +148,7 @@ const addCardFormSubmissionHandler = async (e) => {
   const message = await fetchHttp('/dash/addcard', 'POST', body, e.target);
   if (message) {
     const inputs = e.target.querySelectorAll('input');
+    inputs[0].focus();
     for (let input of inputs) {
       input.value = '';
     }

@@ -55,7 +55,7 @@ exports.postCreateCustomDeck = async (req, res, next) => {
     return next(error);
   }
 
-  let deck, userDeck;
+  let deck;
   try {
     deck = await Deck.insert(title, userId);
   } catch (err) {
@@ -63,17 +63,11 @@ exports.postCreateCustomDeck = async (req, res, next) => {
     return next(error);
   }
 
-  if (deck !== undefined) {
-    try {
-      userDeck = await UserDeck.insert(userId, deck.id);
-    } catch (err) {
-      const error = new HttpError(
-        'Something went wrong, please try again.',
-        500
-      );
-      return next(error);
-    }
+  if (deck === undefined) {
+    const error = new HttpError('Failed to create deck, please try again.', 500);
+    return next(error);
   }
+  
   res.status(201).json({ message: 'Deck successfully created!' });
 };
 
@@ -88,7 +82,7 @@ exports.postAddCard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-
+  
   if (deck === undefined) {
     const error = new HttpError('Deck could not be found.', 422);
     return next(error);
@@ -112,6 +106,7 @@ exports.postAddCard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
+
   if (duplicate.length !== 0) {
     const error = new HttpError(
       'A card for this hanzi already exists in this deck.',
@@ -123,12 +118,11 @@ exports.postAddCard = async (req, res, next) => {
   // Create card/user_card entries
   let card;
   try {
-    card = await Card.insert(hanzi, pinyin, meaning, deck.id, userId);
+    card = await Card.insert(hanzi, pinyin, meaning, deckId, userId);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-
   if (!card.id) {
     const error = new HttpError('Failed to save card, please try again.', 500);
     return next(error);

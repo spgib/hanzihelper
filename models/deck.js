@@ -17,15 +17,18 @@ class Deck {
   }
 
   static async findByTitle(title) {
-    const { rows } = await pool.query(`SELECT id FROM decks WHERE title = $1;`, [
-      title,
-    ]);
-    
+    const { rows } = await pool.query(
+      `SELECT id FROM decks WHERE title = $1;`,
+      [title]
+    );
+
     return rows[0];
   }
 
   static async findById(id) {
-    const { rows } = await pool.query(`SELECT * FROM decks WHERE id = $1`, [id]);
+    const { rows } = await pool.query(`SELECT * FROM decks WHERE id = $1`, [
+      id,
+    ]);
 
     const parsedRows = toCamelCase(rows);
 
@@ -33,12 +36,29 @@ class Deck {
   }
 
   static async insert(title, creatorId) {
-    const { rows } = await pool.query(
-      `INSERT INTO decks (title, creator_id) VALUES ($1, $2) RETURNING *;`,
-      [title, creatorId]
-    );
+    const client = await pool.transactionClient();
+    let parsedRows;
 
-    const parsedRows = toCamelCase(rows);
+    try {
+      await client.query('BEGIN;');
+      const { rows: decks } = await client.query(
+        `INSERT INTO decks (title, creator_id) VALUES ($1, $2) RETURNING *;`,
+        [title, creatorId]
+      );
+
+      const { rows } = await client.query(
+        `INSERT INTO user_decks (user_id, deck_id) VALUES ($1, $2) RETURNING *;`,
+        [creatorId, decks[0].id]
+      );
+
+      parsedRows = toCamelCase(rows);
+      await client.query('COMMIT;');
+    } catch (err) {
+      await client.query('ROLLBACK;');
+      throw err;
+    } finally {
+      client.release();
+    }
 
     return parsedRows[0];
   }

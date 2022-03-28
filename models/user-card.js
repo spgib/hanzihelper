@@ -8,9 +8,9 @@ class UserCard {
         id SERIAL PRIMARY KEY,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
-        first_learned TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        first_learned TIMESTAMP WITH TIME ZONE,
         last_reviewed TIMESTAMP WITH TIME ZONE,
-        learning_level INTEGER DEFAULT 1
+        learning_level INTEGER DEFAULT 0
       );
     `);
   }

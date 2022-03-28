@@ -19,9 +19,25 @@ exports.getDashboard = async (req, res, next) => {
   try {
     decks = await UserDeck.findByUser(userId);
   } catch (err) {
-    const error = new HttpError('Something went wrong, please try again', 500);
+    const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
+  
+  decks.forEach(async deck => {
+    let cards;
+    try {
+      cards = await Card.findCardsFromDeckId(deck.id);
+    } catch (err) {
+      const error = new HttpError('Something went wrong, please try again.', 500);
+      return next(error);
+    }
+    
+    if (cards === undefined) {
+      const error = new HttpError(`Failed to load card info for deck ${deck.title}.`, 500);
+    }
+
+    deck.cards = cards;
+  });
 
   res.render('./dash/dash', {
     title: 'DASH',

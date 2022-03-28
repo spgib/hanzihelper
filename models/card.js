@@ -18,11 +18,13 @@ class Card {
 
   static async findCardsFromDeckId(deckId) {
     const { rows } = await pool.query(
-      `SELECT id, hanzi FROM cards WHERE deck_id = $1;`,
+      `SELECT * FROM cards WHERE deck_id = $1;`,
       [deckId]
     );
 
-    return rows;
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows;
   }
 
   static async insert(hanzi, pinyin, meaning, deckId, userId) {

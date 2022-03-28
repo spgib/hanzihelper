@@ -13,12 +13,12 @@
         <ul class='decks__list'>
           {{#each decks}}
             <li class='decks__item'>
-              <button class='decks__item-main'>
+              <a class='decks__item-main' href="/dash/learn/{{this.id}}">
                 <h3>{{this.title}}</h3>
                 <p>To revise: 0</p>
                 <p>To refresh: 0</p>
                 <p>To learn: 0</p>
-              </button>
+              </a>
             </li>
           {{/each}}
         </ul>

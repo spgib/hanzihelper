@@ -22,18 +22,24 @@ exports.getDashboard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-  
-  decks.forEach(async deck => {
+
+  decks.forEach(async (deck) => {
     let cards;
     try {
       cards = await Card.findCardsFromDeckId(deck.id);
     } catch (err) {
-      const error = new HttpError('Something went wrong, please try again.', 500);
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
       return next(error);
     }
-    
+
     if (cards === undefined) {
-      const error = new HttpError(`Failed to load card info for deck ${deck.title}.`, 500);
+      const error = new HttpError(
+        `Failed to load card info for deck ${deck.title}.`,
+        500
+      );
     }
 
     deck.cards = cards;
@@ -80,10 +86,13 @@ exports.postCreateCustomDeck = async (req, res, next) => {
   }
 
   if (deck === undefined) {
-    const error = new HttpError('Failed to create deck, please try again.', 500);
+    const error = new HttpError(
+      'Failed to create deck, please try again.',
+      500
+    );
     return next(error);
   }
-  
+
   res.status(201).json({ message: 'Deck successfully created!' });
 };
 
@@ -98,7 +107,7 @@ exports.postAddCard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-  
+
   if (deck === undefined) {
     const error = new HttpError('Deck could not be found.', 422);
     return next(error);
@@ -145,4 +154,33 @@ exports.postAddCard = async (req, res, next) => {
   }
 
   return res.status(201).json({ message: 'Card created!' });
+};
+
+exports.getLearnDeck = async (req, res, next) => {
+  const userId = req.session.user.id;
+  const deckId = req.params.deckId;
+
+  let userDeck;
+  try {
+    userDeck = await UserDeck.findByUserAndDeck(userId, deckId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  if (userDeck === undefined) {
+    const error = new HttpError(
+      'You are not authorized to review this deck. Please add this deck to your decks in order to continue.',
+      401
+    );
+    return next(error);
+  }
+
+  return res
+    .status(201)
+    .render('dash/learn/learn', {
+      title: 'Learn Cards!',
+      learn: true,
+      deck: userDeck,
+    });
 };

@@ -14,7 +14,10 @@ class UserDeck {
   }
 
   static async insert(userId, deckId) {
-    const {rows} = await pool.query(`INSERT INTO user_decks (user_id, deck_id) VALUES ($1, $2) RETURNING *`, [userId, deckId]);
+    const { rows } = await pool.query(
+      `INSERT INTO user_decks (user_id, deck_id) VALUES ($1, $2) RETURNING *`,
+      [userId, deckId]
+    );
 
     const parsedRows = toCamelCase(rows);
 
@@ -22,18 +25,35 @@ class UserDeck {
   }
 
   static async findByUser(userId) {
-    const {rows} = await pool.query(`
+    const { rows } = await pool.query(
+      `
       SELECT title, description, user_decks.created_at, decks.id
       FROM decks
       JOIN user_decks ON decks.id = user_decks.deck_id
       JOIN users ON user_decks.user_id = users.id
       WHERE users.id = $1;
-    `, [userId]);
+    `,
+      [userId]
+    );
 
     const parsedRows = toCamelCase(rows);
 
     return parsedRows;
   }
-};
+
+  static async findByUserAndDeck(userId, deckId) {
+    const { rows } = await pool.query(
+      `SELECT * 
+      FROM user_decks
+      JOIN decks ON decks.id = user_decks.deck_id 
+      WHERE user_id = $1 AND deck_id = $2;`,
+      [userId, deckId]
+    );
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+}
 
 module.exports = UserDeck;

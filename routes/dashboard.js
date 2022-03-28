@@ -9,6 +9,8 @@ router.get('/', dashboardController.getIndex);
 
 router.get('/dash', authCheck, dashboardController.getDashboard);
 
+router.get('/dash/learn/:deckId', authCheck, dashboardController.getLearnDeck);
+
 router.post('/dash/custom', authCheck, dashboardController.postCreateCustomDeck);
 
 router.post('/dash/addCard', authCheck, dashboardController.postAddCard);

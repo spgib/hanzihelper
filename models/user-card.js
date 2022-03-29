@@ -10,6 +10,8 @@ class UserCard {
         card_id INTEGER NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
         first_learned TIMESTAMP WITH TIME ZONE,
         last_reviewed TIMESTAMP WITH TIME ZONE,
+        next_review TIMESTAMP WITH TIME ZONE,
+        probation BOOLEAN DEFAULT FALSE,
         learning_level INTEGER DEFAULT 0
       );
     `);

@@ -184,3 +184,7 @@ exports.getLearnDeck = async (req, res, next) => {
       deck: userDeck,
     });
 };
+
+exports.getDeckCards = async (req, res, next) => {
+  
+};

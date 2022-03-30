@@ -1,5 +1,8 @@
-const init = async () => {
-
+let cards;
+const init = (cardsArray) => {
+  cards = cardsArray;
 }
 
-init();
+
+
+export default init;

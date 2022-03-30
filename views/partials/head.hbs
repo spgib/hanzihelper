@@ -18,8 +18,15 @@
       <script type="text/javascript" src="/js/dash.js" defer></script>
     {{/if}}
     {{#if learn }}
-      <script type="text/javascript">`let cards = {{{deck}}}`</script>
-      <script type="text/javascript" src="/js/learn.js" defer></script>
+      <script type="module">
+        import init from '../../js/learn.js';
+        let e = {{{deck}}};
+        const onStart = (e) => {
+          init(e);
+        }
+        window.onload = onStart(e);
+      </script>
+      <script type="module" src="/js/learn.js"></script>
       <link rel="stylesheet" href="/css/learn.css">
     {{/if}}
     <link rel="stylesheet" href="/css/main.css">

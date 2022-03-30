@@ -181,7 +181,7 @@ exports.getLearnDeck = async (req, res, next) => {
     .render('dash/learn/learn', {
       title: 'Learn Cards!',
       learn: true,
-      deck: userDeck,
+      deck: JSON.stringify(userDeck),
     });
 };
 

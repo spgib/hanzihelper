@@ -176,12 +176,25 @@ exports.getLearnDeck = async (req, res, next) => {
     return next(error);
   }
 
+  let userCards;
+  try {
+    userCards = await UserCard.getByDeckAndUser(deckId, userId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  if (userCards.length === 0) {
+    console.log('hey!');
+  }
+  
   return res
     .status(201)
     .render('dash/learn/learn', {
       title: 'Learn Cards!',
       learn: true,
-      deck: JSON.stringify(userDeck),
+      cards: JSON.stringify(userCards),
+      deckId: deckId
     });
 };
 

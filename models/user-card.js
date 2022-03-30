@@ -17,6 +17,22 @@ class UserCard {
     `);
   }
 
+  static async getByDeckAndUser(deckId, userId) {
+    const { rows } = await pool.query(
+      `
+      SELECT *
+      FROM user_cards
+      JOIN cards ON cards.id = user_cards.card_id
+      WHERE cards.deck_id = $1 AND user_cards.user_id = $2;
+    `,
+      [deckId, userId]
+    );
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows;
+  }
+
   static async insert(userId, cardId) {
     const { rows } = await pool.query(
       `INSERT INTO user_cards (user_id, card_id) VALUES ($1, $2) RETURNING *;`,

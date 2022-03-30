@@ -20,11 +20,12 @@
     {{#if learn }}
       <script type="module">
         import init from '../../js/learn.js';
-        let e = {{{deck}}};
-        const onStart = (e) => {
-          init(e);
+        let cards = {{{cards}}};
+        let deckId = {{{deckId}}}
+        const onStart = (cardsArray, dId) => {
+          init(cardsArray, dId);
         }
-        window.onload = onStart(e);
+        window.onload = onStart(cards, deckId);
       </script>
       <script type="module" src="/js/learn.js"></script>
       <link rel="stylesheet" href="/css/learn.css">

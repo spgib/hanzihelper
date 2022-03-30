@@ -1,6 +1,7 @@
-let cards;
-const init = (cardsArray) => {
+let cards, deckId;
+const init = (cardsArray, dId) => {
   cards = cardsArray;
+  deckId = dId;
 }
 
 

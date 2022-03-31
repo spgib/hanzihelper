@@ -23,10 +23,10 @@ exports.getDashboard = async (req, res, next) => {
     return next(error);
   }
 
-  decks.forEach(async (deck) => {
+  for (let deck of decks) {
     let cards;
     try {
-      cards = await Card.findCardsFromDeckId(deck.id);
+      cards = await Card.findAllCardsFromDeckId(deck.id);
     } catch (err) {
       const error = new HttpError(
         'Something went wrong, please try again.',
@@ -40,10 +40,12 @@ exports.getDashboard = async (req, res, next) => {
         `Failed to load card info for deck ${deck.title}.`,
         500
       );
+      return next(error);
     }
-
+    
     deck.cards = cards;
-  });
+  }
+  
 
   res.render('./dash/dash', {
     title: 'DASH',
@@ -125,7 +127,7 @@ exports.postAddCard = async (req, res, next) => {
   // Check whether there is a duplicate card already in deck
   let duplicate;
   try {
-    const deckCards = await Card.findCardsFromDeckId(deckId);
+    const deckCards = await Card.findAllCardsFromDeckId(deckId);
     duplicate = deckCards.filter((card) => card.hanzi === hanzi);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
@@ -140,7 +142,7 @@ exports.postAddCard = async (req, res, next) => {
     return next(error);
   }
 
-  // Create card/user_card entries
+  // Create card entry
   let card;
   try {
     card = await Card.insert(hanzi, pinyin, meaning, deckId, userId);
@@ -148,6 +150,7 @@ exports.postAddCard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
+
   if (!card.id) {
     const error = new HttpError('Failed to save card, please try again.', 500);
     return next(error);
@@ -160,6 +163,7 @@ exports.getLearnDeck = async (req, res, next) => {
   const userId = req.session.user.id;
   const deckId = req.params.deckId;
 
+  // Ensure that the user has a relationship to the deck
   let userDeck;
   try {
     userDeck = await UserDeck.findByUserAndDeck(userId, deckId);
@@ -176,6 +180,7 @@ exports.getLearnDeck = async (req, res, next) => {
     return next(error);
   }
 
+  // Get all cards that the user has already learned
   let userCards;
   try {
     userCards = await UserCard.getByDeckAndUser(deckId, userId);
@@ -184,20 +189,35 @@ exports.getLearnDeck = async (req, res, next) => {
     return next(error);
   }
 
+  // Establish card object to be sent to the view
+  let cards = {
+    rev: [],
+    probation: [],
+    remaining: [],
+  };
+  
+  // Prime the deck with unlearned cards if needed; if not, sort user cards into buckets
   if (userCards.length === 0) {
-    console.log('hey!');
-  }
-  
-  return res
-    .status(201)
-    .render('dash/learn/learn', {
-      title: 'Learn Cards!',
-      learn: true,
-      cards: JSON.stringify(userCards),
-      deckId: deckId
-    });
-};
+    let newCards;
+    try {
+      newCards = await Card.getNextCards(deckId, 10, 0);
+    } catch (err) {
+      const error = new HttpError('Something went wrong, please try again.', 500);
+      return next(error);
+    }
+    console.log(newCards);
+    if (newCards === undefined) {
+      const error = new HttpError('Failed to load new cards to learn.', 500);
+      return next(error);
+    }
 
-exports.getDeckCards = async (req, res, next) => {
-  
+    cards.remaining = newCards;
+  }
+
+  return res.status(201).render('dash/learn/learn', {
+    title: 'Learn Cards!',
+    learn: true,
+    deckId: deckId,
+    cards: JSON.stringify(cards),
+  });
 };

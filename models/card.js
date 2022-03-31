@@ -1,3 +1,4 @@
+const { parse } = require('dotenv');
 const pool = require('../db/pool');
 const toCamelCase = require('../db/utils/to-camel-case');
 
@@ -16,7 +17,7 @@ class Card {
     `);
   }
 
-  static async findCardsFromDeckId(deckId) {
+  static async findAllCardsFromDeckId(deckId) {
     const { rows } = await pool.query(
       `SELECT * FROM cards WHERE deck_id = $1;`,
       [deckId]
@@ -27,37 +28,25 @@ class Card {
     return parsedRows;
   }
 
-  static async insert(hanzi, pinyin, meaning, deckId, userId) {
-    const client = await pool.transactionClient();
-    let parsedRows;
+  static async getNextCards(deckId, limit, offset) {
+    const { rows } = await pool.query(
+      `
+      SELECT id, hanzi, pinyin, meaning
+      FROM cards
+      WHERE deck_id = $1
+      LIMIT $2
+      OFFSET $3;
+    `,
+      [deckId, limit, offset]
+    );
 
-    try {
-      await client.query('BEGIN;');
-      const { rows: cards } = await client.query(
-        `INSERT INTO cards (hanzi, pinyin, meaning, deck_id, creator_id) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
-        [hanzi, pinyin, meaning, deckId, userId]
-      );
-
-      const { rows } = await client.query(
-        `INSERT INTO user_cards (user_id, card_id) VALUES ($1, $2) RETURNING *;`,
-        [userId, cards[0].id]
-      );
-
-      parsedRows = toCamelCase(rows);
-      await client.query('COMMIT;');
-    } catch (err) {
-      await client.query('ROLLBACK;');
-      throw err;
-    } finally {
-      client.release();
-    }
-    return parsedRows[0];
+    return rows;
   }
 
-  static async delete(id) {
+  static async insert(hanzi, pinyin, meaning, deckId, userId) {
     const { rows } = await pool.query(
-      `DELETE FROM cards WHERE id = $1 RETURNING *;`,
-      [id]
+      `INSERT INTO cards (hanzi, pinyin, meaning, deck_id, creator_id) VALUES ($1, $2, $3, $4, $5) RETURNING id;`,
+      [hanzi, pinyin, meaning, deckId, userId]
     );
 
     const parsedRows = toCamelCase(rows);

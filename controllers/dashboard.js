@@ -205,7 +205,7 @@ exports.getLearnDeck = async (req, res, next) => {
       const error = new HttpError('Something went wrong, please try again.', 500);
       return next(error);
     }
-    console.log(newCards);
+    
     if (newCards === undefined) {
       const error = new HttpError('Failed to load new cards to learn.', 500);
       return next(error);

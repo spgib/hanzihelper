@@ -42,10 +42,9 @@ exports.getDashboard = async (req, res, next) => {
       );
       return next(error);
     }
-    
+
     deck.cards = cards;
   }
-  
 
   res.render('./dash/dash', {
     title: 'DASH',
@@ -195,17 +194,20 @@ exports.getLearnDeck = async (req, res, next) => {
     probation: [],
     remaining: [],
   };
-  
+
   // Prime the deck with unlearned cards if needed; if not, sort user cards into buckets
   if (userCards.length === 0) {
     let newCards;
     try {
       newCards = await Card.getNextCards(deckId, 10, 0);
     } catch (err) {
-      const error = new HttpError('Something went wrong, please try again.', 500);
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
       return next(error);
     }
-    
+
     if (newCards === undefined) {
       const error = new HttpError('Failed to load new cards to learn.', 500);
       return next(error);
@@ -220,4 +222,66 @@ exports.getLearnDeck = async (req, res, next) => {
     deckId: deckId,
     cards: JSON.stringify(cards),
   });
+};
+
+exports.postProbation = async (req, res, next) => {
+  const userId = req.session.user.id;
+  const { cardId } = req.body;
+  let probationTime = 10;
+
+  // find userCard
+  let userCard;
+  try {
+    userCard = await UserCard.checkIfUserCard(cardId, userId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+  // if no userCard, create one, and define a shorter probation time
+  if (userCard === undefined) {
+    try {
+      userCard = await UserCard.insert(userId, cardId);
+    } catch (err) {
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
+      return next(error);
+    }
+
+    probationTime = 1;
+  }
+  
+  if (!userCard.id) {
+    const error = new HttpError('Failed to associate card with this user.', 500);
+    return next(error);
+  }
+  // set probation time
+  let prob;
+  try {
+    prob = await UserCard.setProbation(userCard.id, `${probationTime} M`);
+  } catch (err) {
+    console.log(err);
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+  if (prob === undefined) {
+    const error = new HttpError('Failed to update probation time for card.', 500);
+    return next(error);
+  }
+  // join info from card
+  let card;
+  try {
+    card = await UserCard.getByCardAndUser(cardId, userId);
+  } catch(err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  if (card === undefined) {
+    const error = new HttpError('Unable to send card data from server.', 500);
+    return next(error);
+  }
+  // return userCard
+  res.status(200).json({message: 'Updated card probation!', card})
 };

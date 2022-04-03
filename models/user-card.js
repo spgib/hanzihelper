@@ -11,8 +11,8 @@ class UserCard {
         first_learned TIMESTAMP WITH TIME ZONE,
         last_reviewed TIMESTAMP WITH TIME ZONE,
         next_review TIMESTAMP WITH TIME ZONE,
-        probation BOOLEAN DEFAULT FALSE,
-        learning_level INTEGER DEFAULT 0
+        probation_timer TIMESTAMP WITH TIME ZONE,
+        next_rev_interval INTEGER
       );
     `);
   }
@@ -33,11 +33,52 @@ class UserCard {
     return parsedRows;
   }
 
+  static async checkIfUserCard(cardId, userId) {
+    const { rows } = await pool.query(
+      `
+    SELECT id
+    FROM user_cards
+    WHERE card_id = $1 AND user_id = $2;
+    `,
+      [cardId, userId]
+    );
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
+  static async getByCardAndUser(cardId, userId) {
+    const {rows} = await pool.query(`
+    SELECT cards.hanzi, cards.pinyin, cards.meaning, user_cards.probation_timer
+    FROM user_cards
+    JOIN cards ON cards.id = user_cards.card_id
+    WHERE user_cards.card_id = $1 AND user_cards.user_id = $2;
+    `, [cardId, userId]);
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
   static async insert(userId, cardId) {
     const { rows } = await pool.query(
-      `INSERT INTO user_cards (user_id, card_id) VALUES ($1, $2) RETURNING *;`,
+      `INSERT INTO user_cards (user_id, card_id) VALUES ($1, $2) RETURNING id;`,
       [userId, cardId]
     );
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
+  static async setProbation(id, interval) {
+    const {rows} = await pool.query(`
+    UPDATE user_cards
+    SET probation_timer = (SELECT now() + $1::interval)
+    WHERE id = $2
+    RETURNING probation_timer;
+    `, [interval, id]);
 
     const parsedRows = toCamelCase(rows);
 

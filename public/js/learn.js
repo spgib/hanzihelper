@@ -39,7 +39,7 @@ const fetchHttp = async (url, method, body) => {
       throw new Error(responseData.message);
     }
 
-    return responseData.message;
+    return responseData;
   } catch (err) {
     console.log(err);
   }
@@ -49,7 +49,7 @@ let initCards, deckId;
 const init = (cardsObject, dId) => {
   initCards = cardsObject;
   deckId = dId;
-
+  
   initCards.probation.forEach((card) => queue.push(card));
   initCards.rev.forEach((card) => queue.push(card));
   initCards.remaining.forEach((card) => queue.push(card));
@@ -99,20 +99,24 @@ const okButtonHandler = (e) => {
   nextCard();
 };
 
-const failButtonHandler = (e) => {
+const failButtonHandler = async (e) => {
   flipCard(e.target.closest('div'));
 
-  // report probation to server; if no userCard, create one
+  const response = await fetchHttp(`/dash/learn/prob`, 'PATCH', {cardId: currentCard.id});
+  if (!response) {
+    console.log('Something went wrong');
+    return;
+  }
+  const {card} = response;
 
-  // push to probation list
-  probation.push(currentCard);
-  // create probation timer and push to timer list
-  const clone = JSON.parse(JSON.stringify(currentCard));
-  clone.probationTimer = setTimeout(() => {
-    queue.unshift(clone);
-    probation = probation.filter((card) => card.id !== clone.id);
-  }, 1000 * 15);
-  probationTimers.push(clone.probationTimer);
+  probation.push(card);
+  
+  const time = new Date(card.probationTimer) - Date.now();
+  card.timeoutToken = setTimeout(() => {
+    queue.unshift(card);
+    probation = probation.filter((c) => c.id !== card.id);
+  }, time);
+  probationTimers.push(card.timeoutToken);
 
   nextCard();
 };

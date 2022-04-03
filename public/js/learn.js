@@ -101,10 +101,9 @@ const okButtonHandler = (e) => {
 
 const failButtonHandler = async (e) => {
   flipCard(e.target.closest('div'));
-
+  
   const response = await fetchHttp(`/dash/learn/prob`, 'PATCH', {cardId: currentCard.id});
   if (!response) {
-    console.log('Something went wrong');
     return;
   }
   const {card} = response;

@@ -3,6 +3,7 @@ const UserDeck = require('../models/user-deck');
 const HttpError = require('../models/http-error');
 const Card = require('../models/card');
 const UserCard = require('../models/user-card');
+const { response } = require('express');
 
 exports.getIndex = (req, res, next) => {
   if (req.session.isLoggedIn) {
@@ -224,7 +225,7 @@ exports.getLearnDeck = async (req, res, next) => {
   });
 };
 
-exports.postProbation = async (req, res, next) => {
+exports.patchProbation = async (req, res, next) => {
   const userId = req.session.user.id;
   const { cardId } = req.body;
   let probationTime = 10;
@@ -249,7 +250,7 @@ exports.postProbation = async (req, res, next) => {
         );
         return next(error);
       }
-  
+
       if (userCardId === undefined) {
         const error = new HttpError('Failed to update card.', 500);
         return next(error);
@@ -310,4 +311,84 @@ exports.postProbation = async (req, res, next) => {
   }
 
   res.status(200).json({ message: 'Updated card probation!', card });
+};
+
+exports.patchSuccess = async (req, res, next) => {
+  const userId = req.session.user.id;
+  const { cardId } = req.body;
+  let responseCard;
+  
+  // Check to see if userCard exists
+  let userCard;
+  try {
+    userCard = await UserCard.checkIfUserCard(cardId, userId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  // If no userCard, create one and set probation and probation timer
+  if (userCard === undefined) {
+    try {
+      const {id} = await UserCard.insert(userId, cardId);
+      responseCard = await UserCard.setProbationAndTimer(id, '10 M');
+    } catch (err) {
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
+      return next(error);
+    }
+  }
+  
+  // If userCard AND no firstlearned AND no probation marker, set probation and probation timer
+  if (userCard && !userCard.firstLearned && !userCard.probation) {
+    try {
+      responseCard = await UserCard.setProbationAndTimer(userCard.id, '10 M');
+    } catch (err) {
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
+      return next(error);
+    }
+  }
+
+  // If userCard and probation marker, reset probation marker and set lastrev, nextrev, and revinterval
+  if (userCard && userCard.probation) {
+    try {
+      if (!userCard.firstLearned) {
+       await UserCard.addFirstLearned(userCard.id); 
+      }
+      const newLearnInterval = userCard.nextRevInterval * 2;
+      responseCard = await UserCard.setSuccessAfterProbation(userCard.id, userCard.nextRevInterval + ' D', newLearnInterval);
+    } catch (err) {
+      console.log(err);
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
+      return next(error);
+    }
+  }
+
+  // If userCard but no probation marker, set lastrev, nextrev, and revinterval
+  if (userCard && userCard.firstLearned && !userCard.probation) {
+    try {
+      const newLearnInterval = userCard.nextRevInterval * 2;
+      responseCard = await UserCard.setSuccessAfterProbation(userCard.id, userCard.nextRevInterval + ' D', newLearnInterval);
+    } catch (err) {
+      const error = new HttpError('Something went wrong, please try again.', 500);
+      return next(error);
+    }
+  }
+
+  // Join data from Card and respond to front-end
+  try {
+    responseCard = await UserCard.getByCardAndUser(responseCard.cardId, responseCard.userId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+  res.status(200).json({message: 'Successfully reviewed card!', card: responseCard});
 };

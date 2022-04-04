@@ -93,8 +93,26 @@ const showAnswerHandler = (e) => {
   flipCard(e.target.closest('div'));
 };
 
-const okButtonHandler = (e) => {
+const okButtonHandler = async (e) => {
   flipCard(e.target.closest('div'));
+
+  const response = await fetchHttp('/dash/learn/success', 'PATCH', {cardId: currentCard.id});
+  if (!response) {
+    return;
+  }
+  console.log(response);
+  const {card} = response;
+
+  if (card.probation) {
+    probation.push(card);
+
+    const time = new Date(card.probationTimer) - Date.now();
+    card.timeoutToken = setTimeout(() => {
+      queue.unshift(card);
+      probation = probation.filter((c) => c.id !== card.id);
+    }, time);
+    probationTimers.push(card.timeoutToken);
+  }
 
   nextCard();
 };

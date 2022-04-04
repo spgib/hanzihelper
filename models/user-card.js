@@ -13,7 +13,7 @@ class UserCard {
         next_review TIMESTAMP WITH TIME ZONE,
         probation BOOLEAN DEFAULT FALSE,
         probation_timer TIMESTAMP WITH TIME ZONE,
-        next_rev_interval INTEGER
+        next_rev_interval INTEGER DEFAULT 1
       );
     `);
   }
@@ -37,7 +37,7 @@ class UserCard {
   static async checkIfUserCard(cardId, userId) {
     const { rows } = await pool.query(
       `
-    SELECT id, first_learned, probation
+    SELECT *
     FROM user_cards
     WHERE card_id = $1 AND user_id = $2;
     `,
@@ -50,12 +50,15 @@ class UserCard {
   }
 
   static async getByCardAndUser(cardId, userId) {
-    const {rows} = await pool.query(`
-    SELECT cards.id, cards.hanzi, cards.pinyin, cards.meaning, user_cards.probation_timer
+    const { rows } = await pool.query(
+      `
+    SELECT cards.id, cards.hanzi, cards.pinyin, cards.meaning, user_cards.probation, user_cards.probation_timer
     FROM user_cards
     JOIN cards ON cards.id = user_cards.card_id
     WHERE user_cards.card_id = $1 AND user_cards.user_id = $2;
-    `, [cardId, userId]);
+    `,
+      [cardId, userId]
+    );
 
     const parsedRows = toCamelCase(rows);
 
@@ -74,28 +77,72 @@ class UserCard {
   }
 
   static async addProbation(id) {
-    const {rows} = await pool.query(`UPDATE user_cards SET probation = true WHERE id = $1 RETURNING id;`, [id]);
+    const { rows } = await pool.query(
+      `UPDATE user_cards SET probation = true WHERE id = $1 RETURNING id;`,
+      [id]
+    );
 
     return rows[0];
   }
 
   static async removeProbation(id) {
-    const {rows} = await pool.query(`UPDATE user_cards SET probation = false WHERE id = $1 RETURNING id;`, [id]);
+    const { rows } = await pool.query(
+      `UPDATE user_cards SET probation = false WHERE id = $1 RETURNING id;`,
+      [id]
+    );
 
     return rows[0];
   }
 
   static async setProbationTimer(id, interval) {
-    const {rows} = await pool.query(`
+    const { rows } = await pool.query(
+      `
     UPDATE user_cards
     SET probation_timer = (SELECT now() + $1::interval)
     WHERE id = $2
     RETURNING probation_timer;
-    `, [interval, id]);
+    `,
+      [interval, id]
+    );
 
     const parsedRows = toCamelCase(rows);
 
     return parsedRows[0];
+  }
+
+  static async setProbationAndTimer(id, interval) {
+    const { rows } = await pool.query(
+      `UPDATE user_cards SET probation = true, probation_timer = (SELECT now() + $1::interval) WHERE id = $2 RETURNING *;`,
+      [interval, id]
+    );
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
+  static async setSuccessAfterProbation(id, nextRev, nextRevInt) {
+    const {rows} = await pool.query(`
+    UPDATE user_cards
+    SET
+      probation = false,
+      probation_timer = null,
+      last_reviewed = now()::timestamptz,
+      next_review = (SELECT now() + $1::interval)::timestamptz,
+      next_rev_interval = $2
+    WHERE id = $3
+    RETURNING *;
+    `, [nextRev, nextRevInt, id]);
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
+  static async addFirstLearned(id) {
+    const {rows} = await pool.query(`UPDATE user_cards SET first_learned = now()::timestamptz WHERE id = $1 RETURNING id;`, [id]);
+
+    return rows[0];
   }
 }
 

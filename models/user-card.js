@@ -11,6 +11,7 @@ class UserCard {
         first_learned TIMESTAMP WITH TIME ZONE,
         last_reviewed TIMESTAMP WITH TIME ZONE,
         next_review TIMESTAMP WITH TIME ZONE,
+        probation BOOLEAN DEFAULT FALSE,
         probation_timer TIMESTAMP WITH TIME ZONE,
         next_rev_interval INTEGER
       );
@@ -36,7 +37,7 @@ class UserCard {
   static async checkIfUserCard(cardId, userId) {
     const { rows } = await pool.query(
       `
-    SELECT id, first_learned
+    SELECT id, first_learned, probation
     FROM user_cards
     WHERE card_id = $1 AND user_id = $2;
     `,
@@ -72,7 +73,19 @@ class UserCard {
     return parsedRows[0];
   }
 
-  static async setProbation(id, interval) {
+  static async addProbation(id) {
+    const {rows} = await pool.query(`UPDATE user_cards SET probation = true WHERE id = $1 RETURNING id;`, [id]);
+
+    return rows[0];
+  }
+
+  static async removeProbation(id) {
+    const {rows} = await pool.query(`UPDATE user_cards SET probation = false WHERE id = $1 RETURNING id;`, [id]);
+
+    return rows[0];
+  }
+
+  static async setProbationTimer(id, interval) {
     const {rows} = await pool.query(`
     UPDATE user_cards
     SET probation_timer = (SELECT now() + $1::interval)

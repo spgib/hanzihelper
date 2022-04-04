@@ -66,6 +66,8 @@ const nextCard = () => {
       probation.forEach((card) => queue.push(card));
       probation = [];
       probationTimers.forEach((timer) => clearTimeout(timer));
+    } else {
+      window.location.replace('/dash');
     }
   }
 
@@ -100,7 +102,7 @@ const okButtonHandler = async (e) => {
   if (!response) {
     return;
   }
-  console.log(response);
+  
   const {card} = response;
 
   if (card.probation) {

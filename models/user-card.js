@@ -76,9 +76,9 @@ class UserCard {
     return parsedRows[0];
   }
 
-  static async addProbation(id) {
+  static async addProbationAndResetInterval(id) {
     const { rows } = await pool.query(
-      `UPDATE user_cards SET probation = true WHERE id = $1 RETURNING id;`,
+      `UPDATE user_cards SET probation = true, next_rev_interval = 1 WHERE id = $1 RETURNING id;`,
       [id]
     );
 

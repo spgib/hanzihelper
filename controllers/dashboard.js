@@ -271,11 +271,11 @@ exports.patchProbation = async (req, res, next) => {
     probationTime = 1;
   }
 
-  //If userCard exists and card has been learned, add probation
+  //If userCard exists and card has been learned, add probation and reset nextRevInterval
   if (userCard && userCard.firstLearned) {
     if (!userCard.probation) {
       try {
-        await UserCard.addProbation(userCard.id);
+        await UserCard.addProbationAndResetInterval(userCard.id);
       } catch (err) {
         const error = new HttpError(
           'Something went wrong, please try again.',
@@ -286,9 +286,8 @@ exports.patchProbation = async (req, res, next) => {
     }
   }
 
-  let prob;
   try {
-    prob = await UserCard.setProbationTimer(userCard.id, `${probationTime} M`);
+    await UserCard.setProbationTimer(userCard.id, `${probationTime} M`);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);

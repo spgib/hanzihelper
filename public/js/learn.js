@@ -49,12 +49,29 @@ let initCards, deckId;
 const init = (cardsObject, dId) => {
   initCards = cardsObject;
   deckId = dId;
-  
-  initCards.probation.forEach((card) => queue.push(card));
+
+  initCards.probation.forEach((card) => {
+    if (new Date(card.probationTimer) - Date.now() >= 0) {
+      probationHandler(card);
+    } else {
+      queue.push(card);
+    }
+  });
   initCards.rev.forEach((card) => queue.push(card));
   initCards.remaining.forEach((card) => queue.push(card));
   nextCard();
 };
+
+const probationHandler = card => {
+  probation.push(card);
+
+  const time = new Date(card.probationTimer) - Date.now();
+  card.timeoutToken = setTimeout(() => {
+    queue.unshift(card);
+    probation = probation.filter((c) => c.id !== card.id);
+  }, time);
+  probationTimers.push(card.timeoutToken);
+}
 
 const nextCard = () => {
   if (currentCard) {
@@ -98,22 +115,17 @@ const showAnswerHandler = (e) => {
 const okButtonHandler = async (e) => {
   flipCard(e.target.closest('div'));
 
-  const response = await fetchHttp('/dash/learn/success', 'PATCH', {cardId: currentCard.id});
+  const response = await fetchHttp('/dash/learn/success', 'PATCH', {
+    cardId: currentCard.id,
+  });
   if (!response) {
     return;
   }
-  
-  const {card} = response;
+
+  const { card } = response;
 
   if (card.probation) {
-    probation.push(card);
-
-    const time = new Date(card.probationTimer) - Date.now();
-    card.timeoutToken = setTimeout(() => {
-      queue.unshift(card);
-      probation = probation.filter((c) => c.id !== card.id);
-    }, time);
-    probationTimers.push(card.timeoutToken);
+    probationHandler(card);
   }
 
   nextCard();
@@ -121,21 +133,16 @@ const okButtonHandler = async (e) => {
 
 const failButtonHandler = async (e) => {
   flipCard(e.target.closest('div'));
-  
-  const response = await fetchHttp(`/dash/learn/prob`, 'PATCH', {cardId: currentCard.id});
+
+  const response = await fetchHttp(`/dash/learn/prob`, 'PATCH', {
+    cardId: currentCard.id,
+  });
   if (!response) {
     return;
   }
-  const {card} = response;
+  const { card } = response;
 
-  probation.push(card);
-  
-  const time = new Date(card.probationTimer) - Date.now();
-  card.timeoutToken = setTimeout(() => {
-    queue.unshift(card);
-    probation = probation.filter((c) => c.id !== card.id);
-  }, time);
-  probationTimers.push(card.timeoutToken);
+  probationHandler(card);
 
   nextCard();
 };

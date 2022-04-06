@@ -188,7 +188,7 @@ exports.getLearnDeck = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-
+  console.log(userCards);
   // Establish card object to be sent to the view
   let cards = {
     rev: [],
@@ -209,14 +209,31 @@ exports.getLearnDeck = async (req, res, next) => {
       return next(error);
     }
 
-    if (newCards === undefined) {
-      const error = new HttpError('Failed to load new cards to learn.', 500);
-      return next(error);
-    }
+    newCards.forEach(card => {
+      const newCard = {...card};
+      newCard.probation = false;
+      newCard.probationTimer = null;
+      cards.remaining.push(newCard);
+    });
+  } else {
+    userCards.forEach(card => {
+      const data = {
+        id: card.cardId,
+        hanzi: card.hanzi,
+        pinyin: card.pinyin,
+        meaning: card.meaning,
+        probation: card.probation,
+        probationTimer: card.probationTimer
+      };
 
-    cards.remaining = newCards;
+      if (card.probation) {
+        cards.probation.push(data);
+      } else if (new Date(card.nextReview) - Date.now() <= 0) {
+        cards.rev.push(data);
+      }
+    });
   }
-
+  
   return res.status(201).render('dash/learn/learn', {
     title: 'Learn Cards!',
     learn: true,

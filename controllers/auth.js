@@ -68,7 +68,11 @@ exports.postSignup = async (req, res, next) => {
   }
 
   if (user) {
-    req.session.user = user;
+    const { id, username } = user;
+    req.session.user = {
+      id,
+      username,
+    };
     req.session.isLoggedIn = true;
     return req.session.save((err) => {
       if (err) {
@@ -81,7 +85,7 @@ exports.postSignup = async (req, res, next) => {
 
 exports.postLogin = async (req, res, next) => {
   const { email, password } = req.body;
-  
+
   let user;
   try {
     user = await User.findByEmail(email);
@@ -92,7 +96,8 @@ exports.postLogin = async (req, res, next) => {
 
   if (user === undefined) {
     const error = new HttpError(
-      'Cannot find an account registered to this email address.', 401
+      'Cannot find an account registered to this email address.',
+      401
     );
     return next(error);
   }

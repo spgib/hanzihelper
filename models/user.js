@@ -17,11 +17,13 @@ class User {
 
   static async findByUsername(username) {
     const { rows } = await pool.query(
-      `SELECT id FROM users WHERE username = $1;`,
+      `SELECT * FROM users WHERE username = $1;`,
       [username]
     );
 
-    return rows[0];
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
   }
 
   static async findByEmail(email) {
@@ -36,11 +38,13 @@ class User {
 
   static async insert(username, email, password) {
     const { rows } = await pool.query(
-      `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username;`,
+      `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *;`,
       [username, email, password]
     );
 
-    return rows[0];
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
   }
 }
 

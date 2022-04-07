@@ -51,8 +51,8 @@ module.exports = () => {
   app.use(authRoutes);
   app.use(dashboardRoutes);
 
-  app.get('/500', errorController.get500);
-  app.use(errorController.get404);
+  app.get('/500', errorController.render500);
+  app.use(errorController.render404);
 
   app.use((error, req, res, next) => {
     res.status(error.code || 500);

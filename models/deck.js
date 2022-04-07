@@ -18,11 +18,13 @@ class Deck {
 
   static async findByTitle(title) {
     const { rows } = await pool.query(
-      `SELECT id FROM decks WHERE title = $1;`,
+      `SELECT * FROM decks WHERE title = $1;`,
       [title]
     );
 
-    return rows[0];
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
   }
 
   static async findById(id) {

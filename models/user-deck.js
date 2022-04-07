@@ -24,14 +24,13 @@ class UserDeck {
     return parsedRows[0];
   }
 
-  static async findByUser(userId) {
+  static async getUserDecksInfo(userId) {
     const { rows } = await pool.query(
       `
-      SELECT title, description, user_decks.created_at, decks.id
-      FROM decks
-      JOIN user_decks ON decks.id = user_decks.deck_id
-      JOIN users ON user_decks.user_id = users.id
-      WHERE users.id = $1;
+      SELECT decks.id, title, description, user_decks.created_at
+      FROM user_decks
+      JOIN decks ON user_decks.deck_id = decks.id
+      WHERE user_decks.user_id = $1;
     `,
       [userId]
     );

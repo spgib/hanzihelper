@@ -17,7 +17,7 @@ class Card {
     `);
   }
 
-  static async findAllCardsFromDeckId(deckId) {
+  static async findAllFromDeckId(deckId) {
     const { rows } = await pool.query(
       `SELECT * FROM cards WHERE deck_id = $1;`,
       [deckId]

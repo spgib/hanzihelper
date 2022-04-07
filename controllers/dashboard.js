@@ -9,24 +9,24 @@ exports.renderIndex = (req, res, next) => {
     return res.redirect('/dash');
   }
 
-  res.render('index', { title: '你好' });
+  res.status(200).render('index', { title: '你好' });
 };
 
 exports.renderDashboard = async (req, res, next) => {
   const userId = req.session.user.id;
-
+  
   let decks;
   try {
-    decks = await UserDeck.findByUser(userId);
+    decks = await UserDeck.getUserDecksInfo(userId);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-
+  
   for (let deck of decks) {
     let cards;
     try {
-      cards = await Card.findAllCardsFromDeckId(deck.id);
+      cards = await Card.findAllFromDeckId(deck.id);
     } catch (err) {
       const error = new HttpError(
         'Something went wrong, please try again.',
@@ -35,18 +35,10 @@ exports.renderDashboard = async (req, res, next) => {
       return next(error);
     }
 
-    if (cards === undefined) {
-      const error = new HttpError(
-        `Failed to load card info for deck ${deck.title}.`,
-        500
-      );
-      return next(error);
-    }
-
     deck.cards = cards;
   }
 
-  res.render('./dash/dash', {
+  res.status(200).render('./dash/dash', {
     title: 'DASH',
     dash: true,
     noDecks: decks.length === 0,
@@ -83,14 +75,6 @@ exports.postCreateCustomDeck = async (req, res, next) => {
     deck = await Deck.insert(title, userId);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
-    return next(error);
-  }
-
-  if (deck === undefined) {
-    const error = new HttpError(
-      'Failed to create deck, please try again.',
-      500
-    );
     return next(error);
   }
 
@@ -187,7 +171,7 @@ exports.getLearnDeck = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-  console.log(userCards);
+  
   // Establish card object to be sent to the view
   let cards = {
     rev: [],
@@ -374,7 +358,6 @@ exports.patchSuccess = async (req, res, next) => {
         newLearnInterval
       );
     } catch (err) {
-      console.log(err);
       const error = new HttpError(
         'Something went wrong, please try again.',
         500

@@ -17,7 +17,7 @@ describe('Dash Controller - Create Custom Deck', function () {
 
   it('should forward a 500 error if db fails', async function () {
     sinon.stub(Deck, 'insert');
-    sinon.stub(UserDeck, 'insert');
+    let nextValue;
 
     const req = {
       body: {
@@ -30,47 +30,37 @@ describe('Dash Controller - Create Custom Deck', function () {
       },
     };
 
-    let res;
     const next = (x) => {
-      res = x;
+      nextValue = x;
     };
 
     Deck.findByTitle.throws();
     await DashController.postCreateCustomDeck(req, {}, next);
-    expect(res).to.be.an('error');
-    expect(res).to.have.property('code', 500);
-    expect(res).to.have.property(
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property(
       'message',
       'Something went wrong, please try again.'
     );
-    res = null;
+    nextValue = null;
 
-    Deck.findByTitle.returns(undefined);
+    Deck.findByTitle.returns([]);
     Deck.insert.throws();
     await DashController.postCreateCustomDeck(req, {}, next);
-    expect(res).to.be.an('error');
-    expect(res).to.have.property('code', 500);
-    expect(res).to.have.property(
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property(
       'message',
       'Something went wrong, please try again.'
     );
-    res = null;
-
-    Deck.insert.returns('success');
-    UserDeck.insert.throws();
-    await DashController.postCreateCustomDeck(req, {}, next);
-    expect(res).to.be.an('error');
-    expect(res).to.have.property('code', 500);
-    expect(res).to.have.property(
-      'message',
-      'Something went wrong, please try again.'
-    );
+    nextValue = null;
 
     Deck.insert.restore();
-    UserDeck.insert.restore();
   });
 
   it('should forward a 422 error if there is an existing deck with that title', async function () {
+    let nextValue;
+
     const req = {
       body: {
         title: 'test',
@@ -82,16 +72,15 @@ describe('Dash Controller - Create Custom Deck', function () {
       },
     };
 
-    let res;
     const next = (x) => {
-      res = x;
+      nextValue = x;
     };
 
     Deck.findByTitle.returns('duplicate');
     await DashController.postCreateCustomDeck(req, {}, next);
-    expect(res).to.be.an('error');
-    expect(res).to.have.property('code', 422);
-    expect(res).to.have.property(
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 422);
+    expect(nextValue).to.have.property(
       'message',
       'A deck already exists with this title!'
     );
@@ -99,7 +88,6 @@ describe('Dash Controller - Create Custom Deck', function () {
 
   it('should forward a 201 code and a success message on deck creation', async function () {
     sinon.stub(Deck, 'insert');
-    sinon.stub(UserDeck, 'insert');
 
     const req = {
       body: {
@@ -123,14 +111,12 @@ describe('Dash Controller - Create Custom Deck', function () {
       },
     };
 
-    Deck.findByTitle.returns(undefined);
+    Deck.findByTitle.returns([]);
     Deck.insert.returns('success');
-    UserDeck.insert.returns('success');
     await DashController.postCreateCustomDeck(req, res, () => {});
     expect(code).to.equal(201);
     expect(message).to.have.property('message', 'Deck successfully created!');
 
     Deck.insert.restore();
-    UserDeck.insert.restore();
   });
 });

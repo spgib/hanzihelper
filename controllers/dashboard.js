@@ -65,7 +65,7 @@ exports.postCreateCustomDeck = async (req, res, next) => {
     return next(error);
   }
 
-  if (duplicate !== undefined) {
+  if (duplicate.length > 0) {
     const error = new HttpError('A deck already exists with this title!', 422);
     return next(error);
   }

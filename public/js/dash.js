@@ -111,7 +111,7 @@ const customDeckFormSubmissionHandler = async (e) => {
     title,
   };
 
-  const message = await fetchHttp('/dash/custom', 'POST', body, e.target);
+  const message = await fetchHttp('/dash/deck/custom', 'POST', body, e.target);
   if (message) {
     closeModal();
     dashActionBtn.click();
@@ -145,7 +145,7 @@ const addCardFormSubmissionHandler = async (e) => {
     meaning
   };
   
-  const message = await fetchHttp('/dash/addcard', 'POST', body, e.target);
+  const message = await fetchHttp('/dash/deck/addcard', 'POST', body, e.target);
   if (message) {
     const inputs = e.target.querySelectorAll('input');
     inputs[0].focus();

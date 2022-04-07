@@ -5,20 +5,18 @@ const authCheck = require('../middleware/auth-check');
 
 const router = express.Router();
 
-router.get('/', dashboardController.getIndex);
+router.get('/', dashboardController.renderIndex);
 
-router.get('/dash', authCheck, dashboardController.getDashboard);
+router.get('/dash', authCheck, dashboardController.renderDashboard);
 
-router.get('/dash/learn/deck/:deckId', authCheck, dashboardController.getLearnDeck);
+router.get('/learn/deck/:deckId', authCheck, dashboardController.getLearnDeck);
 
-// router.get('/dash/cards/:deckTitle', authCheck, dashboardController.getDeckCards);
+router.post('/dash/deck/custom', authCheck, dashboardController.postCreateCustomDeck);
 
-router.post('/dash/custom', authCheck, dashboardController.postCreateCustomDeck);
+router.post('/dash/deck/addCard', authCheck, dashboardController.postAddCard);
 
-router.post('/dash/addCard', authCheck, dashboardController.postAddCard);
+router.patch('/learn/fail', authCheck, dashboardController.patchProbation);
 
-router.patch('/dash/learn/prob', authCheck, dashboardController.patchProbation);
-
-router.patch('/dash/learn/success', authCheck, dashboardController.patchSuccess);
+router.patch('/learn/success', authCheck, dashboardController.patchSuccess);
 
 module.exports = router;

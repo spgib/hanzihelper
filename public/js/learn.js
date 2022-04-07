@@ -115,7 +115,7 @@ const showAnswerHandler = (e) => {
 const okButtonHandler = async (e) => {
   flipCard(e.target.closest('div'));
 
-  const response = await fetchHttp('/dash/learn/success', 'PATCH', {
+  const response = await fetchHttp('/learn/success', 'PATCH', {
     cardId: currentCard.id,
   });
   if (!response) {
@@ -134,7 +134,7 @@ const okButtonHandler = async (e) => {
 const failButtonHandler = async (e) => {
   flipCard(e.target.closest('div'));
 
-  const response = await fetchHttp(`/dash/learn/prob`, 'PATCH', {
+  const response = await fetchHttp(`/learn/fail`, 'PATCH', {
     cardId: currentCard.id,
   });
   if (!response) {

@@ -3,9 +3,8 @@ const UserDeck = require('../models/user-deck');
 const HttpError = require('../models/http-error');
 const Card = require('../models/card');
 const UserCard = require('../models/user-card');
-const { response } = require('express');
 
-exports.getIndex = (req, res, next) => {
+exports.renderIndex = (req, res, next) => {
   if (req.session.isLoggedIn) {
     return res.redirect('/dash');
   }
@@ -13,7 +12,7 @@ exports.getIndex = (req, res, next) => {
   res.render('index', { title: '你好' });
 };
 
-exports.getDashboard = async (req, res, next) => {
+exports.renderDashboard = async (req, res, next) => {
   const userId = req.session.user.id;
 
   let decks;

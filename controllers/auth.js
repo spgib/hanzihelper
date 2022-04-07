@@ -2,14 +2,14 @@ const User = require('../models/user');
 const HttpError = require('../models/http-error');
 const bcrypt = require('bcrypt');
 
-exports.getLogin = (req, res, next) => {
+exports.renderLogin = (req, res, next) => {
   res.status(200).render('./auth/login', {
     title: 'Log In',
     login: true,
   });
 };
 
-exports.getSignup = (req, res, next) => {
+exports.renderSignup = (req, res, next) => {
   res.status(200).render('./auth/signup', {
     title: 'Sign Up',
     signup: true,
@@ -128,6 +128,6 @@ exports.postLogout = (req, res, next) => {
     if (err) {
       console.log(err);
     }
-    res.redirect('/login');
+    res.status(200).redirect('/login');
   });
 };

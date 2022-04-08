@@ -4,8 +4,143 @@ const sinon = require('sinon');
 const DashController = require('../controllers/dashboard');
 const Card = require('../models/card');
 const Deck = require('../models/deck');
-const User = require('../models/user');
+const UserCard = require('../models/user-card');
 const UserDeck = require('../models/user-deck');
+
+describe('Dash Controller - Render Dashboard', function () {
+  it('should forward a 500 error if db fails', async function () {
+    sinon.stub(UserDeck, 'getUserDecksInfo');
+    sinon.stub(Card, 'findAllFromDeckId');
+
+    const req = {
+      session: {
+        user: {
+          id: 1,
+        },
+      },
+    };
+
+    let nextValue;
+    const next = (x) => {
+      nextValue = x;
+    };
+
+    UserDeck.getUserDecksInfo.throws();
+    await DashController.renderDashboard(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property(
+      'message',
+      'Something went wrong, please try again.'
+    );
+    nextValue = null;
+
+    UserDeck.getUserDecksInfo.returns([{ id: 1 }]);
+    Card.findAllFromDeckId.throws();
+    await DashController.renderDashboard(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property(
+      'message',
+      'Something went wrong, please try again.'
+    );
+
+    UserDeck.getUserDecksInfo.restore();
+    Card.findAllFromDeckId.restore();
+  });
+});
+
+describe('Dash Controller - Render Learn Deck', function () {
+  this.beforeEach(function () {
+    sinon.stub(UserDeck, 'findByUserAndDeck');
+  });
+
+  this.afterEach(function () {
+    UserDeck.findByUserAndDeck.restore();
+  });
+
+  it('should forward a 500 error when db fails', async function () {
+    sinon.stub(UserCard, 'findByUserAndDeck');
+    sinon.stub(Card, 'getNextCards');
+
+    const req = {
+      session: {
+        user: {
+          id: 1,
+        },
+      },
+      params: {
+        deckId: 1,
+      },
+    };
+
+    let nextValue;
+    const next = (x) => {
+      nextValue = x;
+    };
+
+    UserDeck.findByUserAndDeck.throws();
+    await DashController.renderLearnDeck(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property(
+      'message',
+      'Something went wrong, please try again.'
+    );
+    nextValue = null;
+
+    UserDeck.findByUserAndDeck.returns('pass');
+    UserCard.findByUserAndDeck.throws();
+    await DashController.renderLearnDeck(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property(
+      'message',
+      'Something went wrong, please try again.'
+    );
+    nextValue = null;
+
+    UserCard.findByUserAndDeck.returns([]);
+    Card.getNextCards.throws();
+    await DashController.renderLearnDeck(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property(
+      'message',
+      'Something went wrong, please try again.'
+    );
+
+    UserCard.findByUserAndDeck.restore();
+    Card.getNextCards.restore();
+  });
+
+  it('should forward a 401 error if no userDeck is found', async function () {
+    const req = {
+      session: {
+        user: {
+          id: 1,
+        },
+      },
+      params: {
+        deckId: 1,
+      },
+    };
+
+    let nextValue;
+    const next = (x) => {
+      nextValue = x;
+    };
+
+    UserDeck.findByUserAndDeck.returns(undefined);
+    await DashController.renderLearnDeck(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 401);
+    expect(nextValue).to.have.property(
+      'message',
+      'You are not authorized to review this deck. Please add this deck to your decks in order to continue.'
+    );
+  });
+});
 
 describe('Dash Controller - Create Custom Deck', function () {
   this.beforeEach(function () {

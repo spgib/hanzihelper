@@ -9,7 +9,7 @@ router.get('/', dashboardController.renderIndex);
 
 router.get('/dash', authCheck, dashboardController.renderDashboard);
 
-router.get('/learn/deck/:deckId', authCheck, dashboardController.getLearnDeck);
+router.get('/learn/deck/:deckId', authCheck, dashboardController.renderLearnDeck);
 
 router.post('/dash/deck/custom', authCheck, dashboardController.postCreateCustomDeck);
 

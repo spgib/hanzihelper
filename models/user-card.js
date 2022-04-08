@@ -18,7 +18,7 @@ class UserCard {
     `);
   }
 
-  static async getByDeckAndUser(deckId, userId) {
+  static async findByUserAndDeck(userId, deckId) {
     const { rows } = await pool.query(
       `
       SELECT *
@@ -34,22 +34,7 @@ class UserCard {
     return parsedRows;
   }
 
-  static async checkIfUserCard(cardId, userId) {
-    const { rows } = await pool.query(
-      `
-    SELECT *
-    FROM user_cards
-    WHERE card_id = $1 AND user_id = $2;
-    `,
-      [cardId, userId]
-    );
-
-    const parsedRows = toCamelCase(rows);
-
-    return parsedRows[0];
-  }
-
-  static async getByCardAndUser(cardId, userId) {
+  static async findByUserAndCard(userId, cardId) {
     const { rows } = await pool.query(
       `
     SELECT cards.id, cards.hanzi, cards.pinyin, cards.meaning, user_cards.probation, user_cards.probation_timer
@@ -65,16 +50,38 @@ class UserCard {
     return parsedRows[0];
   }
 
+  static async isUserCard(userId, cardId) {
+    const { rows } = await pool.query(
+      `
+    SELECT *
+    FROM user_cards
+    WHERE card_id = $1 AND user_id = $2;
+    `,
+    [cardId, userId]
+    );
+    
+    const parsedRows = toCamelCase(rows);
+    
+    return parsedRows[0];
+  }
+  
+  
   static async insert(userId, cardId) {
     const { rows } = await pool.query(
       `INSERT INTO user_cards (user_id, card_id) VALUES ($1, $2) RETURNING id;`,
       [userId, cardId]
-    );
+      );
+      
+      const parsedRows = toCamelCase(rows);
+      
+      return parsedRows[0];
+    }
 
-    const parsedRows = toCamelCase(rows);
-
-    return parsedRows[0];
-  }
+    static async addFirstLearned(id) {
+      const {rows} = await pool.query(`UPDATE user_cards SET first_learned = now()::timestamptz WHERE id = $1 RETURNING id;`, [id]);
+  
+      return rows[0];
+    }
 
   static async addProbationAndResetInterval(id) {
     const { rows } = await pool.query(
@@ -121,7 +128,7 @@ class UserCard {
     return parsedRows[0];
   }
 
-  static async setSuccessAfterProbation(id, nextRev, nextRevInt) {
+  static async setSuccess(id, nextRev, nextRevInt) {
     const {rows} = await pool.query(`
     UPDATE user_cards
     SET
@@ -137,12 +144,6 @@ class UserCard {
     const parsedRows = toCamelCase(rows);
 
     return parsedRows[0];
-  }
-
-  static async addFirstLearned(id) {
-    const {rows} = await pool.query(`UPDATE user_cards SET first_learned = now()::timestamptz WHERE id = $1 RETURNING id;`, [id]);
-
-    return rows[0];
   }
 }
 

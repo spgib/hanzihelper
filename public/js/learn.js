@@ -57,7 +57,7 @@ const init = (cardsObject, dId) => {
       queue.push(card);
     }
   });
-  initCards.rev.forEach((card) => queue.push(card));
+  initCards.review.forEach((card) => queue.push(card));
   initCards.remaining.forEach((card) => queue.push(card));
   nextCard();
 };

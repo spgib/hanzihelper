@@ -23,7 +23,7 @@ class Deck {
     );
 
     const parsedRows = toCamelCase(rows);
-
+    
     return parsedRows[0];
   }
 

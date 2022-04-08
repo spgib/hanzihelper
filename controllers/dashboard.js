@@ -64,15 +64,14 @@ exports.postCreateCustomDeck = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-
-  if (duplicate.length > 0) {
+  
+  if (duplicate !== undefined) {
     const error = new HttpError('A deck already exists with this title!', 422);
     return next(error);
   }
 
-  let deck;
   try {
-    deck = await Deck.insert(title, userId);
+    await Deck.insert(title, userId);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
@@ -92,13 +91,12 @@ exports.postAddCard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-
+  
   if (deck === undefined) {
     const error = new HttpError('Deck could not be found.', 422);
     return next(error);
   }
 
-  // Check whether user has admin rights on deck
   if (deck.creatorId !== userId) {
     const error = new HttpError(
       'User does not have permission to modify this deck.',
@@ -107,10 +105,9 @@ exports.postAddCard = async (req, res, next) => {
     return next(error);
   }
 
-  // Check whether there is a duplicate card already in deck
   let duplicate;
   try {
-    const deckCards = await Card.findAllCardsFromDeckId(deckId);
+    const deckCards = await Card.findAllFromDeckId(deckId);
     duplicate = deckCards.filter((card) => card.hanzi === hanzi);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
@@ -125,7 +122,6 @@ exports.postAddCard = async (req, res, next) => {
     return next(error);
   }
 
-  // Create card entry
   let card;
   try {
     card = await Card.insert(hanzi, pinyin, meaning, deckId, userId);
@@ -134,12 +130,9 @@ exports.postAddCard = async (req, res, next) => {
     return next(error);
   }
 
-  if (!card.id) {
-    const error = new HttpError('Failed to save card, please try again.', 500);
-    return next(error);
+  if (card.id) {
+    return res.status(201).json({ message: 'Card created!' });
   }
-
-  return res.status(201).json({ message: 'Card created!' });
 };
 
 exports.getLearnDeck = async (req, res, next) => {

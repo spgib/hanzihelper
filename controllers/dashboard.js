@@ -226,7 +226,7 @@ exports.patchProbation = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-
+  
   if (userCard === undefined) {
     try {
       userCard = await UserCard.insert(userId, cardId);
@@ -280,7 +280,7 @@ exports.patchProbation = async (req, res, next) => {
 
   let card;
   try {
-    card = await UserCard.getByCardAndUser(cardId, userId);
+    card = await UserCard.findByUserAndCard(userId, cardId);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);

@@ -442,3 +442,82 @@ describe('Dash Controller - postAddCard', function () {
     Card.insert.restore();
   });
 });
+
+describe('Dash Controller - patchProbation', function() {
+  it('should forward a 500 error if db fails', async function() {
+    sinon.stub(UserCard, 'isUserCard');
+    sinon.stub(UserCard, 'insert');
+    sinon.stub(UserCard, 'removeProbation');
+    sinon.stub(UserCard, 'addProbationAndResetInterval');
+    sinon.stub(UserCard, 'setProbationTimer');
+    sinon.stub(UserCard, 'findByUserAndCard');
+
+    const req = {
+      session: {
+        user: {
+          id: 1
+        }
+      },
+      body: {
+        cardId: 1
+      }
+    }
+
+    let nextValue;
+    const next = (x) => {
+      nextValue = x;
+    };
+
+    UserCard.isUserCard.throws();
+    await DashController.patchProbation(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property('message', 'Something went wrong, please try again.');
+    nextValue = null;
+
+    UserCard.isUserCard.returns(undefined);
+    UserCard.insert.throws();
+    await DashController.patchProbation(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property('message', 'Something went wrong, please try again.');
+    nextValue = null;
+
+    const userCard = {
+      firstLearned: null,
+      probation: true
+    };
+    UserCard.isUserCard.returns(userCard);
+    UserCard.removeProbation.throws();
+    await DashController.patchProbation(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property('message', 'Something went wrong, please try again.');
+    nextValue = null;
+
+    userCard.firstLearned = 'yesterday';
+    userCard.probation = false;
+    UserCard.addProbationAndResetInterval.throws();
+    await DashController.patchProbation(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property('message', 'Something went wrong, please try again.');
+    nextValue = null;
+
+    userCard.probation = true;
+    UserCard.setProbationTimer.throws();
+    await DashController.patchProbation(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property('message', 'Something went wrong, please try again.');
+    nextValue = null;
+
+    UserCard.setProbationTimer.returns('ok');
+    UserCard.findByUserAndCard.throws();
+    await DashController.patchProbation(req, {}, next);
+    expect(nextValue).to.be.an('error');
+    expect(nextValue).to.have.property('code', 500);
+    expect(nextValue).to.have.property('message', 'Something went wrong, please try again.');
+    
+  });
+}); 

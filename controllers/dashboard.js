@@ -168,7 +168,7 @@ exports.renderLearnDeck = async (req, res, next) => {
     probation: [],
     remaining: [],
   };
-
+  
   if (userCards.length === 0) {
     let newCards;
     try {
@@ -197,15 +197,35 @@ exports.renderLearnDeck = async (req, res, next) => {
         probation: userCard.probation,
         probationTimer: userCard.probationTimer,
       };
-
-      if (card.probation) {
+      
+      if (userCard.probation) {
         cards.probation.push(card);
-      } else if (new Date(card.nextReview) - Date.now() <= 0) {
+      } else if (new Date(userCard.nextReview) - Date.now() <= 0) {
         cards.review.push(card);
       }
     });
-  }
+    
+    if (cards.review.length === 0 && cards.probation.length === 0) {
+      let newCards;
+      try {
+        newCards = await Card.getNextCards(deckId, 10, userCards.length);
+      } catch (err) {
+        const error = new HttpError(
+          'Something went wrong, please try again.',
+          500
+        );
+        return next(error);
+      }
 
+      newCards.forEach((card) => {
+        const newCard = { ...card };
+        newCard.probation = false;
+        newCard.probationTimer = null;
+        cards.remaining.push(newCard);
+      });
+    }
+  }
+  
   return res.status(200).render('dash/learn/learn', {
     title: 'Learn Cards!',
     learn: true,
@@ -226,7 +246,7 @@ exports.patchProbation = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-  
+
   if (userCard === undefined) {
     try {
       userCard = await UserCard.insert(userId, cardId);
@@ -298,7 +318,7 @@ exports.patchSuccess = async (req, res, next) => {
 
   let userCard;
   try {
-    userCard = await UserCard.isUserCard(cardId, userId);
+    userCard = await UserCard.isUserCard(userId, cardId);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
@@ -376,6 +396,6 @@ exports.patchSuccess = async (req, res, next) => {
   if (card) {
     return res
       .status(200)
-      .json({ message: 'Successfully reviewed card!', card: responseCard });
+      .json({ message: 'Successfully reviewed card!', card });
   }
 };

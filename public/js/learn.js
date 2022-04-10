@@ -62,7 +62,7 @@ const init = (cardsObject, dId) => {
   nextCard();
 };
 
-const probationHandler = card => {
+const probationHandler = (card) => {
   probation.push(card);
 
   const time = new Date(card.probationTimer) - Date.now();
@@ -71,9 +71,9 @@ const probationHandler = card => {
     probation = probation.filter((c) => c.id !== card.id);
   }, time);
   probationTimers.push(card.timeoutToken);
-}
+};
 
-const nextCard = () => {
+const nextCard = async () => {
   if (currentCard) {
     pastCards.push(currentCard);
   }
@@ -84,7 +84,13 @@ const nextCard = () => {
       probation = [];
       probationTimers.forEach((timer) => clearTimeout(timer));
     } else {
-      window.location.replace('/dash');
+      const { cards } = await fetchHttp('/learn/next/' + deckId, 'GET');
+
+      cards.forEach((card) => queue.push(card));
+
+      if (queue.length === 0) {
+        window.location.replace('/dash');
+      }
     }
   }
 

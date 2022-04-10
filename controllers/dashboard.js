@@ -399,3 +399,47 @@ exports.patchSuccess = async (req, res, next) => {
       .json({ message: 'Successfully reviewed card!', card });
   }
 };
+
+exports.getNextCards = async (req, res, next) => {
+  const userId = req.session.user.id;
+  const deckId = req.params.deckId;
+
+  let userDeck;
+  try {
+    userDeck = await UserDeck.findByUserAndDeck(userId, deckId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  if (userDeck === undefined) {
+    const error = new HttpError(
+      'You are not authorized to review this deck. Please add this deck to your decks in order to continue.',
+      401
+    );
+    return next(error);
+  }
+
+  let userCards;
+  try {
+    userCards = await UserCard.findByUserAndDeck(userId, deckId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  let nextCards;
+  try {
+    nextCards = await Card.getNextCards(deckId, 20, userCards.length);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  nextCards.forEach((card) => {
+    card.probation = false;
+    card.probationTimer = null;
+  });
+
+  return res.status(200).json({message: 'Successfully fetched more cards!', cards: nextCards});
+}

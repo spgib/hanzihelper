@@ -11,6 +11,8 @@ router.get('/dash', authCheck, dashboardController.renderDashboard);
 
 router.get('/learn/deck/:deckId', authCheck, dashboardController.renderLearnDeck);
 
+router.get('/learn/next/:deckId', authCheck, dashboardController.getNextCards);
+
 router.post('/dash/deck/custom', authCheck, dashboardController.postCreateCustomDeck);
 
 router.post('/dash/deck/addCard', authCheck, dashboardController.postAddCard);

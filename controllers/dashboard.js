@@ -22,22 +22,23 @@ exports.renderDashboard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-
+  
   for (let deck of decks) {
-    let cards;
+    let data;
     try {
-      cards = await Card.findAllFromDeckId(deck.id);
+      data = await UserDeck.getDeckCardsInfo(deck.id);
     } catch (err) {
-      const error = new HttpError(
-        'Something went wrong, please try again.',
-        500
-      );
+      const error = new HttpError('Something went wrong, please try again.', 500);
       return next(error);
     }
 
-    deck.cards = cards;
+    const { revisionCards, refreshCards, unlearnedCards, totalCards } = data;
+    deck.revisionCards = revisionCards;
+    deck.refreshCards = refreshCards;
+    deck.unlearnedCards = unlearnedCards;
+    deck.totalCards = totalCards;
   }
-
+  
   res.status(200).render('./dash/dash', {
     title: 'DASH',
     dash: true,

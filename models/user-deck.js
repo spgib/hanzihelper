@@ -27,7 +27,7 @@ class UserDeck {
   static async getUserDecksInfo(userId) {
     const { rows } = await pool.query(
       `
-      SELECT decks.id, title, description, user_decks.created_at
+      SELECT decks.id, title, description, user_decks.id, user_decks.created_at
       FROM user_decks
       JOIN decks ON user_decks.deck_id = decks.id
       WHERE user_decks.user_id = $1;
@@ -48,6 +48,34 @@ class UserDeck {
       WHERE user_id = $1 AND deck_id = $2;`,
       [userId, deckId]
     );
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
+  static async getDeckCardsInfo(deckId) {
+    const { rows } = await pool.query(`
+    SELECT 
+	    (SELECT COUNT(*) AS revision_cards 
+	 	    FROM user_cards
+		    JOIN cards ON user_cards.card_id = cards.id
+		    WHERE cards.deck_id = $1
+			  AND user_cards.probation = true),
+	    (SELECT COUNT(*) AS refresh_cards
+		    FROM user_cards
+		    JOIN cards ON user_cards.card_id = cards.id
+		    WHERE cards.deck_id = $1
+			    AND user_cards.next_review < NOW()
+			    AND user_cards.probation = false), 
+	    (SELECT (
+		    (SELECT COUNT(*) FROM cards WHERE cards.deck_id = $1) -
+		    (SELECT COUNT(*) FROM user_cards
+			    JOIN cards ON cards.id = user_cards.card_id
+			    WHERE cards.deck_id = $1)
+	    ) AS unlearned_cards),
+      (SELECT COUNT(*) AS total_cards FROM cards WHERE cards.deck_id = $1);
+    `, [deckId]);
 
     const parsedRows = toCamelCase(rows);
 

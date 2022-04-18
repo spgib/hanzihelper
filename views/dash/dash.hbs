@@ -15,9 +15,9 @@
             <li class='decks__item'>
               <a class='decks__item-main' href="/learn/deck/{{this.id}}">
                 <h3>{{this.title}}</h3>
-                <p>To revise: 0</p>
-                <p>To refresh: 0</p>
-                <p>To learn: 0</p>
+                <p>To revise: {{this.revisionCards}}</p>
+                <p>To refresh: {{this.refreshCards}}</p>
+                <p>To learn: {{this.unlearnedCards}}</p>
               </a>
             </li>
           {{/each}}

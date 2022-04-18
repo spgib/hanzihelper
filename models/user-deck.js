@@ -57,11 +57,19 @@ class UserDeck {
   static async getDeckCardsInfo(deckId) {
     const { rows } = await pool.query(`
     SELECT 
-	    (SELECT COUNT(*) AS revision_cards 
-	 	    FROM user_cards
-		    JOIN cards ON user_cards.card_id = cards.id
-		    WHERE cards.deck_id = $1
-			  AND user_cards.probation = true),
+	    (SELECT (
+        (SELECT COUNT(*)
+	 	      FROM user_cards
+		      JOIN cards ON user_cards.card_id = cards.id
+		      WHERE cards.deck_id = $1
+			    AND user_cards.probation = true) +
+		    (SELECT (SELECT COUNT(*)
+			    FROM user_cards
+			    JOIN cards ON user_cards.card_id = cards.id
+			    WHERE cards.deck_id = $1
+				    AND user_cards.probation = false
+				    AND user_cards.first_learned IS NULL) * 2)
+      ) AS revision_cards),
 	    (SELECT COUNT(*) AS refresh_cards
 		    FROM user_cards
 		    JOIN cards ON user_cards.card_id = cards.id

@@ -28,6 +28,7 @@ exports.renderDashboard = async (req, res, next) => {
     try {
       data = await UserDeck.getDeckCardsInfo(deck.id);
     } catch (err) {
+      console.log(err);
       const error = new HttpError('Something went wrong, please try again.', 500);
       return next(error);
     }

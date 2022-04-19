@@ -157,6 +157,14 @@ exports.renderLearnDeck = async (req, res, next) => {
     return next(error);
   }
 
+  let deckCardsInfo;
+  try {
+    deckCardsInfo = await UserDeck.getDeckCardsInfo(deckId);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
   let userCards;
   try {
     userCards = await UserCard.findByUserAndDeck(userId, deckId);
@@ -232,6 +240,7 @@ exports.renderLearnDeck = async (req, res, next) => {
     title: 'Learn Cards!',
     learn: true,
     deckId: deckId,
+    info: deckCardsInfo,
     cards: JSON.stringify(cards),
   });
 };

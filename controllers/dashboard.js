@@ -26,7 +26,7 @@ exports.renderDashboard = async (req, res, next) => {
   for (let deck of decks) {
     let data;
     try {
-      data = await UserDeck.getDeckCardsInfo(deck.id);
+      data = await UserDeck.getDeckCardsInfo(userId, deck.id);
     } catch (err) {
       console.log(err);
       const error = new HttpError('Something went wrong, please try again.', 500);
@@ -159,7 +159,7 @@ exports.renderLearnDeck = async (req, res, next) => {
 
   let deckCardsInfo;
   try {
-    deckCardsInfo = await UserDeck.getDeckCardsInfo(deckId);
+    deckCardsInfo = await UserDeck.getDeckCardsInfo(userId, deckId);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);

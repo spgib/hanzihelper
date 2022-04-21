@@ -37,7 +37,7 @@ class UserCard {
   static async findByUserAndCard(userId, cardId) {
     const { rows } = await pool.query(
       `
-    SELECT cards.id, cards.hanzi, cards.pinyin, cards.meaning, user_cards.probation, user_cards.probation_timer
+    SELECT cards.id, cards.hanzi, cards.pinyin, cards.meaning, user_cards.probation, user_cards.probation_timer, user_cards.first_learned
     FROM user_cards
     JOIN cards ON cards.id = user_cards.card_id
     WHERE user_cards.card_id = $1 AND user_cards.user_id = $2;

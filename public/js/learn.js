@@ -132,6 +132,8 @@ const okButtonHandler = async (e) => {
 
   if (card.probation) {
     probationHandler(card);
+  } else if (card.firstLearned) {
+    cardStatHandler({stack: 'refresh', op: 'subtract'});
   }
 
   nextCard();
@@ -152,6 +154,16 @@ const failButtonHandler = async (e) => {
 
   nextCard();
 };
+
+const cardStatHandler = (...adjustments) => {
+  const cardStats = document.querySelectorAll('.learn__sub-banner p');
+  
+  adjustments.forEach(adj => {
+    if (adj.stack === 'refresh') {
+      cardStats[1].innerHTML = adj.op === 'add' ? (parseInt(cardStats[1].innerHTML) + 1) : (parseInt(cardStats[1].innerHTML)-1);
+    }
+  });
+}
 
 showAnswerBtn.addEventListener('click', showAnswerHandler);
 okBtn.addEventListener('click', okButtonHandler);

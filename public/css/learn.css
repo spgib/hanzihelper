@@ -2,4 +2,8 @@
   visibility: hidden;
 }
 
+.learn__sub-banner p {
+  display: inline;
+}
+
 /*# sourceMappingURL=learn.css.map */

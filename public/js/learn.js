@@ -128,11 +128,15 @@ const okButtonHandler = async (e) => {
     return;
   }
 
-  const { card } = response;
-
+  const { card, lastStack } = response;
+  
   if (card.probation) {
     probationHandler(card);
-  } else if (card.firstLearned) {
+  }
+
+  if (lastStack === 'revise') {
+    cardStatHandler({stack: 'revise', op: 'subtract'});
+  } else if (lastStack === 'refresh') {
     cardStatHandler({stack: 'refresh', op: 'subtract'});
   }
 
@@ -159,6 +163,9 @@ const cardStatHandler = (...adjustments) => {
   const cardStats = document.querySelectorAll('.learn__sub-banner p');
   
   adjustments.forEach(adj => {
+    if (adj.stack === 'revise') {
+      cardStats[0].innerHTML = adj.op === 'add' ? (parseInt(cardStats[0].innerHTML)+1) : (parseInt(cardStats[0].innerHTML)-1);
+    }
     if (adj.stack === 'refresh') {
       cardStats[1].innerHTML = adj.op === 'add' ? (parseInt(cardStats[1].innerHTML) + 1) : (parseInt(cardStats[1].innerHTML)-1);
     }

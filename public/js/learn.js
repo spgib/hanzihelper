@@ -129,15 +129,15 @@ const okButtonHandler = async (e) => {
   }
 
   const { card, lastStack } = response;
-  
+
   if (card.probation) {
     probationHandler(card);
   }
 
   if (lastStack === 'revise') {
-    cardStatHandler({stack: 'revise', op: 'subtract'});
+    cardStatHandler({ stack: 'revise', op: 'subtract' });
   } else if (lastStack === 'refresh') {
-    cardStatHandler({stack: 'refresh', op: 'subtract'});
+    cardStatHandler({ stack: 'refresh', op: 'subtract' });
   }
 
   nextCard();
@@ -152,25 +152,38 @@ const failButtonHandler = async (e) => {
   if (!response) {
     return;
   }
-  const { card } = response;
+  const { card, lastStack } = response;
 
   probationHandler(card);
+
+  if (lastStack === 'refresh') {
+    cardStatHandler(
+      { stack: 'refresh', op: 'subtract' },
+      { stack: 'revise', op: 'add' }
+    );
+  }
 
   nextCard();
 };
 
 const cardStatHandler = (...adjustments) => {
   const cardStats = document.querySelectorAll('.learn__sub-banner p');
-  
-  adjustments.forEach(adj => {
+
+  adjustments.forEach((adj) => {
     if (adj.stack === 'revise') {
-      cardStats[0].innerHTML = adj.op === 'add' ? (parseInt(cardStats[0].innerHTML)+1) : (parseInt(cardStats[0].innerHTML)-1);
+      cardStats[0].innerHTML =
+        adj.op === 'add'
+          ? parseInt(cardStats[0].innerHTML) + 1
+          : parseInt(cardStats[0].innerHTML) - 1;
     }
     if (adj.stack === 'refresh') {
-      cardStats[1].innerHTML = adj.op === 'add' ? (parseInt(cardStats[1].innerHTML) + 1) : (parseInt(cardStats[1].innerHTML)-1);
+      cardStats[1].innerHTML =
+        adj.op === 'add'
+          ? parseInt(cardStats[1].innerHTML) + 1
+          : parseInt(cardStats[1].innerHTML) - 1;
     }
   });
-}
+};
 
 showAnswerBtn.addEventListener('click', showAnswerHandler);
 okBtn.addEventListener('click', okButtonHandler);

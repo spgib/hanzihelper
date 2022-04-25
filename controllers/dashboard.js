@@ -249,6 +249,7 @@ exports.patchProbation = async (req, res, next) => {
   const userId = req.session.user.id;
   const { cardId } = req.body;
   let probationTime = 10;
+  let lastStack;
 
   let userCard;
   try {
@@ -261,6 +262,7 @@ exports.patchProbation = async (req, res, next) => {
   if (userCard === undefined) {
     try {
       userCard = await UserCard.insert(userId, cardId);
+      lastStack = 'new';
     } catch (err) {
       const error = new HttpError(
         'Something went wrong, please try again.',
@@ -273,9 +275,11 @@ exports.patchProbation = async (req, res, next) => {
   }
 
   if (userCard && userCard.firstLearned === null) {
+    lastStack = 'new';
     if (userCard.probation) {
       try {
         await UserCard.removeProbation(userCard.id);
+        lastStack = 'new+';
       } catch (err) {
         const error = new HttpError(
           'Something went wrong, please try again.',
@@ -289,9 +293,11 @@ exports.patchProbation = async (req, res, next) => {
   }
 
   if (userCard && userCard.firstLearned) {
+    lastStack = 'revise';
     if (!userCard.probation) {
       try {
         await UserCard.addProbationAndResetInterval(userCard.id);
+        lastStack = 'refresh';
       } catch (err) {
         const error = new HttpError(
           'Something went wrong, please try again.',
@@ -318,7 +324,7 @@ exports.patchProbation = async (req, res, next) => {
   }
 
   if (card) {
-    return res.status(200).json({ message: 'Updated card probation!', card });
+    return res.status(200).json({ message: 'Updated card probation!', card, lastStack });
   }
 };
 
@@ -351,7 +357,7 @@ exports.patchSuccess = async (req, res, next) => {
   if (userCard && !userCard.firstLearned && !userCard.probation) {
     try {
       card = await UserCard.setProbationAndTimer(userCard.id, '10 M');
-      lastStack = 'brandNew';
+      lastStack = 'new';
     } catch (err) {
       const error = new HttpError(
         'Something went wrong, please try again.',

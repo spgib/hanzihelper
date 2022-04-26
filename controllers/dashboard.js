@@ -345,6 +345,7 @@ exports.patchSuccess = async (req, res, next) => {
     try {
       const { id } = await UserCard.insert(userId, cardId);
       card = await UserCard.setProbationAndTimer(id, '10 M');
+      lastStack = 'new';
     } catch (err) {
       const error = new HttpError(
         'Something went wrong, please try again.',

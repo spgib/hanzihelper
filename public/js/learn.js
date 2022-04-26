@@ -138,6 +138,8 @@ const okButtonHandler = async (e) => {
     cardStatHandler({ stack: 'revise', op: 'subtract' });
   } else if (lastStack === 'refresh') {
     cardStatHandler({ stack: 'refresh', op: 'subtract' });
+  } else if (lastStack === 'new') {
+    cardStatHandler({ stack: 'learn', op: 'subtract' }, {stack: 'revise', op: 'add'});
   }
 
   nextCard();
@@ -181,6 +183,12 @@ const cardStatHandler = (...adjustments) => {
         adj.op === 'add'
           ? parseInt(cardStats[1].innerHTML) + 1
           : parseInt(cardStats[1].innerHTML) - 1;
+    }
+    if (adj.stack === 'learn') {
+      cardStats[2].innerHTML =
+        adj.op === 'add'
+          ? parseInt(cardStats[2].innerHTML) + 1
+          : parseInt(cardStats[2].innerHTML) - 1;
     }
   });
 };

@@ -139,7 +139,10 @@ const okButtonHandler = async (e) => {
   } else if (lastStack === 'refresh') {
     cardStatHandler({ stack: 'refresh', op: 'subtract' });
   } else if (lastStack === 'new') {
-    cardStatHandler({ stack: 'learn', op: 'subtract' }, {stack: 'revise', op: 'add'});
+    cardStatHandler(
+      { stack: 'learn', op: 'subtract' },
+      { stack: 'revise', op: 'add', amount: 1 }
+    );
   }
 
   nextCard();
@@ -161,8 +164,17 @@ const failButtonHandler = async (e) => {
   if (lastStack === 'refresh') {
     cardStatHandler(
       { stack: 'refresh', op: 'subtract' },
-      { stack: 'revise', op: 'add' }
+      { stack: 'revise', op: 'add', amount: 1 }
     );
+  } else if (lastStack === 'fresh') {
+    cardStatHandler(
+      { stack: 'learn', op: 'subtract' },
+      { stack: 'revise', op: 'add', amount: 2 }
+    );
+  } else if (lastStack === 'new') {
+    cardStatHandler({ stack: 'revise', op: 'add', amount: 1 });
+  } else if (lastStack === 'new+') {
+    cardStatHandler({ stack: 'revise', op: 'add', amount: 1 });
   }
 
   nextCard();
@@ -175,7 +187,7 @@ const cardStatHandler = (...adjustments) => {
     if (adj.stack === 'revise') {
       cardStats[0].innerHTML =
         adj.op === 'add'
-          ? parseInt(cardStats[0].innerHTML) + 1
+          ? parseInt(cardStats[0].innerHTML) + adj.amount
           : parseInt(cardStats[0].innerHTML) - 1;
     }
     if (adj.stack === 'refresh') {

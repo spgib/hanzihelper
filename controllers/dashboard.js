@@ -262,7 +262,7 @@ exports.patchProbation = async (req, res, next) => {
   if (userCard === undefined) {
     try {
       userCard = await UserCard.insert(userId, cardId);
-      lastStack = 'new';
+      lastStack = 'fresh';
     } catch (err) {
       const error = new HttpError(
         'Something went wrong, please try again.',
@@ -358,7 +358,7 @@ exports.patchSuccess = async (req, res, next) => {
   if (userCard && !userCard.firstLearned && !userCard.probation) {
     try {
       card = await UserCard.setProbationAndTimer(userCard.id, '10 M');
-      lastStack = 'new';
+      lastStack = 'revise';
     } catch (err) {
       const error = new HttpError(
         'Something went wrong, please try again.',

@@ -26,7 +26,7 @@ const fetchHttp = async (url, method, body, form) => {
       throw new Error(responseData.message);
     }
 
-    return responseData.message;
+    return responseData;
   } catch (err) {
     const error = form.querySelector('h3');
     if (error) {
@@ -111,12 +111,12 @@ const customDeckFormSubmissionHandler = async (e) => {
     title,
   };
 
-  const message = await fetchHttp('/dash/deck/custom', 'POST', body, e.target);
-  if (message) {
+  const responseData = await fetchHttp('/dash/deck/custom', 'POST', body, e.target);
+  if (responseData) {
     closeModal();
     dashActionBtn.click();
-    addDeckToList(title);
-    httpMessageAlert(message);
+    addDeckToList(title, responseData.deck.id, responseData.deck.createdAt);
+    httpMessageAlert(responseData.message);
   }
 };
 
@@ -160,25 +160,56 @@ const modalCancelHandler = () => {
   closeModal();
 };
 
-const addDeckToList = (title) => {
+const addDeckToList = (title, deckId, createdAt) => {
   const decksContainer = document.querySelector('.dash__decks');
   const decksList = decksContainer.querySelector('ul');
-  const markup = `
-  <li class='decks__item'>
-  <button class='decks__item-main'>
-  <h3>${title}</h3>
-  </button>
-  </li>
+  const decksInfoContainer = document.querySelector('.dash__decks-info');
+  const decksInfoList = decksInfoContainer.querySelector('ul');
+
+  const learnMarkup = `
+    <li class='decks__item'>
+      <a class='decks__item-main' href="/learn/deck/${deckId}">
+        <h3>${title}</h3>
+        <p>To revise: 0</p>
+        <p>To refresh: 0</p>
+        <p>To learn: 0</p>
+      </a>
+    </li>
   `;
+  const infoMarkup = `
+    <li class='decks__item'>
+      <button class='collapsible'>
+        ${title}
+      </button>
+      <div class='collapsible-content hidden'>
+        <p>Description: </p>
+        <p>Total cards: 0</p>
+        <p>Learning since: ${createdAt}</p>
+      </div>
+    </li>
+  `;
+
   if (!decksList) {
     decksContainer.firstElementChild.remove();
-    const ul = document.createElement('ul');
+    const deckUl = document.createElement('ul');
+    deckUl.classList.add('decks__list');
+    deckUl.innerHTML = learnMarkup;
+    decksContainer.append(deckUl);
+
+    decksInfoContainer.firstElementChild.remove();
+    const infoUl = document.createElement('ul');
     ul.classList.add('decks__list');
-    ul.innerHTML = markup;
-    decksContainer.append(ul);
+    ul.innerHTML = infoMarkup;
+    decksInfoContainer.append(infoUl);
   } else {
-    decksList.innerHTML = decksList.innerHTML + markup;
+    decksList.innerHTML = decksList.innerHTML + learnMarkup;
+    decksInfoList.innerHTML = decksInfoList.innerHTML + infoMarkup;
   }
+
+  const collapsibles = decksInfoList.querySelectorAll('.collapsible');
+  collapsibles.forEach(collapsible => {
+    collapsible.addEventListener('click', collapsibleHandler);
+  })
 };
 
 const httpMessageAlert = (message) => {

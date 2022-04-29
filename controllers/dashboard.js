@@ -72,14 +72,15 @@ exports.postCreateCustomDeck = async (req, res, next) => {
     return next(error);
   }
 
+  let deck;
   try {
-    await Deck.insert(title, userId);
+    deck = await Deck.insert(title, userId);
   } catch (err) {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
 
-  res.status(201).json({ message: 'Deck successfully created!' });
+  res.status(201).json({ message: 'Deck successfully created!', deck });
 };
 
 exports.postAddCard = async (req, res, next) => {

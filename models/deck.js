@@ -53,7 +53,7 @@ class Deck {
         [creatorId, decks[0].id]
       );
 
-      parsedRows = toCamelCase(rows);
+      parsedRows = toCamelCase(decks);
       await client.query('COMMIT;');
     } catch (err) {
       await client.query('ROLLBACK;');

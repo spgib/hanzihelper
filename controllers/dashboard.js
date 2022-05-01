@@ -46,7 +46,7 @@ exports.renderDashboard = async (req, res, next) => {
     noDecks: decks.length === 0,
     decks: decks,
     withTemplates: true,
-    templates: ['custom-deck', 'add-card'],
+    templates: ['custom-deck', 'add-card', 'deck-item', 'deck-info'],
     helpers: {
       temp(x) {
         return 'templates/' + x;

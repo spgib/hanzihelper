@@ -166,50 +166,34 @@ const addDeckToList = (title, deckId, createdAt) => {
   const decksInfoContainer = document.querySelector('.dash__decks-info');
   const decksInfoList = decksInfoContainer.querySelector('ul');
 
-  const learnMarkup = `
-    <li class='decks__item'>
-      <a class='decks__item-main' href="/learn/deck/${deckId}">
-        <h3>${title}</h3>
-        <p>To revise: 0</p>
-        <p>To refresh: 0</p>
-        <p>To learn: 0</p>
-      </a>
-    </li>
-  `;
-  const infoMarkup = `
-    <li class='decks__item'>
-      <button class='collapsible'>
-        ${title}
-      </button>
-      <div class='collapsible-content hidden'>
-        <p>Description: </p>
-        <p>Total cards: 0</p>
-        <p>Learning since: ${createdAt}</p>
-      </div>
-    </li>
-  `;
+  const deckItemTemplate = document.getElementById('deck-item-template');
+  const deckItemClone = deckItemTemplate.content.firstElementChild.cloneNode(true);
+  deckItemClone.querySelector('a').setAttribute('href', `/learn/deck/${deckId}`);
+  deckItemClone.querySelector('h3').textContent = title;
+
+  const deckInfoTemplate = document.getElementById('deck-info-template');
+  const deckInfoClone = deckInfoTemplate.content.firstElementChild.cloneNode(true);
+  const deckInfoBtn = deckInfoClone.querySelector('button');
+  deckInfoBtn.textContent = title;
+  deckInfoBtn.addEventListener('click', collapsibleHandler);
+  deckInfoClone.querySelector('p:last-of-type').textContent = 'Learning since: ' + createdAt;
 
   if (!decksList) {
     decksContainer.firstElementChild.remove();
     const deckUl = document.createElement('ul');
     deckUl.classList.add('decks__list');
-    deckUl.innerHTML = learnMarkup;
+    deckUl.append(deckItemClone);
     decksContainer.append(deckUl);
 
     decksInfoContainer.firstElementChild.remove();
     const infoUl = document.createElement('ul');
-    ul.classList.add('decks__list');
-    ul.innerHTML = infoMarkup;
+    infoUl.classList.add('decks__list');
+    infoUl.append(deckInfoTemplate);
     decksInfoContainer.append(infoUl);
   } else {
-    decksList.innerHTML = decksList.innerHTML + learnMarkup;
-    decksInfoList.innerHTML = decksInfoList.innerHTML + infoMarkup;
+    decksList.append(deckItemClone);
+    decksInfoList.append(deckInfoClone);
   }
-
-  const collapsibles = decksInfoList.querySelectorAll('.collapsible');
-  collapsibles.forEach(collapsible => {
-    collapsible.addEventListener('click', collapsibleHandler);
-  })
 };
 
 const httpMessageAlert = (message) => {

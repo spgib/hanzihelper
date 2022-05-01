@@ -194,6 +194,14 @@ const addDeckToList = (title, deckId, createdAt) => {
     decksList.append(deckItemClone);
     decksInfoList.append(deckInfoClone);
   }
+
+  // Add an option for this deck to the select field on the add card form
+  const addCardTemplate = document.getElementById('add-card-template');
+  const templateSelect = addCardTemplate.content.querySelector('select');
+  const newOption = document.createElement('option');
+  newOption.value = deckId;
+  newOption.textContent = title;
+  templateSelect.append(newOption);
 };
 
 const httpMessageAlert = (message) => {

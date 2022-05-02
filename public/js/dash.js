@@ -145,14 +145,26 @@ const addCardFormSubmissionHandler = async (e) => {
     meaning
   };
   
-  const message = await fetchHttp('/dash/deck/addcard', 'POST', body, e.target);
-  if (message) {
+  const responseData = await fetchHttp('/dash/deck/addcard', 'POST', body, e.target);
+  if (responseData.message) {
     const inputs = e.target.querySelectorAll('input');
     inputs[0].focus();
     for (let input of inputs) {
       input.value = '';
     }
-    httpMessageAlert(message);
+    httpMessageAlert(responseData.message);
+
+    // Update the DOM to increment the number of cards to be learned
+    const deckLinks = document.querySelectorAll('.decks__item-main');
+    for (let dl of deckLinks) {
+      const href = dl.getAttribute('href').split('/');
+      const id = href[href.length - 1];
+      if (id === deckId) {
+        const p = dl.querySelector('p:last-of-type');
+        const numOfCards = p.textContent.split(' ')[2];
+        p.textContent = 'To learn: ' + (parseInt(numOfCards) + 1);
+      }
+    }
   }
 };
 

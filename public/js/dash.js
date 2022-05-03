@@ -4,6 +4,7 @@ const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
 const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
 const tabLinks = document.querySelectorAll('.tab-link');
 const collapsibles = document.querySelectorAll('.collapsible');
+const collapsibleDeleteBtns = document.querySelectorAll('.collapsible__delete-btn');
 
 const fetchHttp = async (url, method, body, form) => {
   try {
@@ -189,6 +190,8 @@ const addDeckToList = (title, deckId, createdAt) => {
   deckInfoBtn.textContent = title;
   deckInfoBtn.addEventListener('click', collapsibleHandler);
   deckInfoClone.querySelector('p:last-of-type').textContent = 'Learning since: ' + createdAt;
+  const deleteBtn = deckInfoClone.querySelector('.collapsible__delete-btn');
+  deleteBtn.addEventListener('click', deleteDeckHandler);
 
   if (!decksList) {
     decksContainer.firstElementChild.remove();
@@ -216,6 +219,11 @@ const addDeckToList = (title, deckId, createdAt) => {
   templateSelect.append(newOption);
 };
 
+const deleteDeckHandler = e => {
+    const title = e.target.closest('.decks__item').firstElementChild.textContent.trim();
+    console.log(title.length);
+}
+
 const httpMessageAlert = (message) => {
   const alert = document.createElement('div');
   alert.classList.add('alert');
@@ -229,6 +237,9 @@ const httpMessageAlert = (message) => {
 collapsibles.forEach((collapsible) =>
   collapsible.addEventListener('click', collapsibleHandler)
 );
+collapsibleDeleteBtns.forEach(btn => {
+  btn.addEventListener('click', deleteDeckHandler)
+})
 dashActionBtn.addEventListener('click', actionItemsHandler);
 customDeckBtn.addEventListener('click', openCustomDeckHandler);
 addCardBtn.addEventListener('click', openAddCardHandler);

@@ -220,8 +220,25 @@ const addDeckToList = (title, deckId, createdAt) => {
 };
 
 const deleteDeckHandler = e => {
-    const title = e.target.closest('.decks__item').firstElementChild.textContent.trim();
-    console.log(title.length);
+  const title = e.target.closest('.decks__item').firstElementChild.textContent.trim();
+  deleteDeck(title);
+}
+
+const deleteDeck = (deckTitle) => {
+  // update DOM to remove deck list item and info collapsible
+  const h3List = document.querySelectorAll('.decks__item h3');
+  for (h3 of h3List) {
+    if (h3.textContent.trim() === deckTitle) {
+      h3.closest('.decks__item').remove();
+    }
+  }
+
+  const collapsibleBtnList = document.querySelectorAll('.collapsible');
+  for (btn of collapsibleBtnList) {
+    if (btn.textContent.trim() === deckTitle) {
+      btn.closest('.decks__item').remove();
+    }
+  }
 }
 
 const httpMessageAlert = (message) => {

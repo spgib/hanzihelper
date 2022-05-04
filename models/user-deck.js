@@ -55,7 +55,8 @@ class UserDeck {
   }
 
   static async getDeckCardsInfo(userId, deckId) {
-    const { rows } = await pool.query(`
+    const { rows } = await pool.query(
+      `
     SELECT 
 	    (SELECT (
         (SELECT COUNT(*)
@@ -87,9 +88,49 @@ class UserDeck {
             AND user_cards.user_id = $2)
 	    ) AS unlearned_cards),
       (SELECT COUNT(*) AS total_cards FROM cards WHERE cards.deck_id = $1);
-    `, [deckId, userId]);
+    `,
+      [deckId, userId]
+    );
 
     const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
+  static async delete(id) {
+    const client = await pool.transactionClient();
+    let parsedRows;
+
+    try {
+      await client.query('BEGIN;');
+
+      await client.query(
+        `DELETE FROM user_cards
+          WHERE id IN (
+          SELECT user_cards.id AS id
+          FROM user_cards
+          JOIN cards ON cards.id = user_cards.card_id
+          JOIN decks ON decks.id = cards.deck_id
+          JOIN user_decks ON decks.id = user_decks.deck_id
+          WHERE user_decks.id = $1
+          )
+          RETURNING *;`,
+        [id]
+      );
+
+      const { rows } = await client.query(
+        `DELETE FROM user_decks WHERE id = $1`,
+        [id]
+      );
+
+      parsedRows = toCamelCase(rows);
+      await client.query('COMMIT;');
+    } catch (err) {
+      await client.query('ROLLBACK;');
+      throw err;
+    } finally {
+      client.release();
+    }
 
     return parsedRows[0];
   }

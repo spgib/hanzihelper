@@ -64,6 +64,14 @@ class Deck {
 
     return parsedRows[0];
   }
+
+  static async delete(id) {
+    const {rows} = await pool.query(`DELETE FROM decks WHERE id = $1 RETURNING *;`, [id]);
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
 }
 
 module.exports = Deck;

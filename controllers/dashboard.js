@@ -22,14 +22,17 @@ exports.renderDashboard = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-  
+
   for (let deck of decks) {
     let data;
     try {
       data = await UserDeck.getDeckCardsInfo(userId, deck.id);
     } catch (err) {
       console.log(err);
-      const error = new HttpError('Something went wrong, please try again.', 500);
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
       return next(error);
     }
 
@@ -39,7 +42,7 @@ exports.renderDashboard = async (req, res, next) => {
     deck.unlearnedCards = unlearnedCards;
     deck.totalCards = totalCards;
   }
-  
+
   res.status(200).render('./dash/dash', {
     title: 'DASH',
     dash: true,
@@ -179,7 +182,7 @@ exports.renderLearnDeck = async (req, res, next) => {
     probation: [],
     remaining: [],
   };
-  
+
   if (userCards.length === 0) {
     let newCards;
     try {
@@ -208,14 +211,14 @@ exports.renderLearnDeck = async (req, res, next) => {
         probation: userCard.probation,
         probationTimer: userCard.probationTimer,
       };
-      
+
       if (userCard.probation) {
         cards.probation.push(card);
       } else if (new Date(userCard.nextReview) - Date.now() <= 0) {
         cards.review.push(card);
       }
     });
-    
+
     if (cards.review.length === 0 && cards.probation.length === 0) {
       let newCards;
       try {
@@ -236,7 +239,7 @@ exports.renderLearnDeck = async (req, res, next) => {
       });
     }
   }
-  
+
   return res.status(200).render('dash/learn/learn', {
     title: 'Learn Cards!',
     learn: true,
@@ -325,7 +328,9 @@ exports.patchProbation = async (req, res, next) => {
   }
 
   if (card) {
-    return res.status(200).json({ message: 'Updated card probation!', card, lastStack });
+    return res
+      .status(200)
+      .json({ message: 'Updated card probation!', card, lastStack });
   }
 };
 
@@ -463,5 +468,68 @@ exports.getNextCards = async (req, res, next) => {
     card.probationTimer = null;
   });
 
-  return res.status(200).json({message: 'Successfully fetched more cards!', cards: nextCards});
-}
+  return res
+    .status(200)
+    .json({ message: 'Successfully fetched more cards!', cards: nextCards });
+};
+
+exports.deleteDeck = async (req, res, next) => {
+  const userId = req.session.user.id;
+  const deckTitle = req.params.deckTitle;
+
+  let deck;
+  try {
+    deck = await Deck.findByTitle(deckTitle);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  let message;
+  if (deck.creatorId === userId) {
+    try {
+      await Deck.delete(deck.id);
+    } catch (err) {
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
+      return next(error);
+    }
+
+    message = 'Deck deleted!';
+  } else {
+    let userDeck;
+    try {
+      userDeck = await UserDeck.findByUserAndDeck(userId, deck.id);
+    } catch (err) {
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
+      return next(error);
+    }
+
+    if (userDeck === undefined) {
+      const error = new HttpError(
+        'This deck is not associated with your account and cannot be deleted.',
+        401
+      );
+      return next(error);
+    }
+
+    try {
+      await UserDeck.delete(userDeck.id);
+    } catch (err) {
+      const error = new HttpError(
+        'Something went wrong, please try again.',
+        500
+      );
+      return next(error);
+    }
+
+    message = 'User deck deleted!';
+  }
+
+  return res.status(200).json({ message });
+};

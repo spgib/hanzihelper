@@ -21,4 +21,6 @@ router.patch('/learn/fail', authCheck, dashboardController.patchProbation);
 
 router.patch('/learn/success', authCheck, dashboardController.patchSuccess);
 
+router.delete('/deck/:deckTitle', authCheck, dashboardController.deleteDeck);
+
 module.exports = router;

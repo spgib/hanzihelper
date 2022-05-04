@@ -224,7 +224,9 @@ const deleteDeckHandler = e => {
   deleteDeck(title);
 }
 
-const deleteDeck = (deckTitle) => {
+const deleteDeck = async (deckTitle) => {
+  const responseData = await fetchHttp('/deck/' + deckTitle, 'DELETE');
+
   // update DOM to remove deck list item and info collapsible
   const h3List = document.querySelectorAll('.decks__item h3');
   for (h3 of h3List) {

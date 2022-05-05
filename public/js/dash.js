@@ -221,11 +221,31 @@ const addDeckToList = (title, deckId, createdAt) => {
 
 const deleteDeckHandler = e => {
   const title = e.target.closest('.decks__item').firstElementChild.textContent.trim();
-  deleteDeck(title);
+
+  // create delete confirmation modal
+  const modal = document.createElement('div');
+  modal.classList.add('modal');
+  modal.innerHTML = `
+    <div>
+      <h3>Are you sure?</h3>
+      <p>If you delete this deck, you will lose all of the progress you have made. Additionally, if you are this deck's creator and the deck is public, 
+      the deck will be deleted for all other users as well.</p>
+    </div>
+    <button type="button">Cancel</button>
+    <button type="button">Delete</button>
+  `;
+
+  // add listeners to the buttons
+  const buttons = modal.querySelectorAll('button');
+  buttons[0].addEventListener('click', modalCancelHandler);
+  buttons[1].addEventListener('click', deleteDeck.bind(this, title));
+
+  // open backdrop
+  createBackdrop(modal);
 }
 
 const deleteDeck = async (deckTitle) => {
-  const responseData = await fetchHttp('/deck/' + deckTitle, 'DELETE');
+  await fetchHttp('/deck/' + deckTitle, 'DELETE');
 
   // update DOM to remove deck list item and info collapsible
   const h3List = document.querySelectorAll('.decks__item h3');
@@ -241,6 +261,8 @@ const deleteDeck = async (deckTitle) => {
       btn.closest('.decks__item').remove();
     }
   }
+
+  closeModal();
 }
 
 const httpMessageAlert = (message) => {

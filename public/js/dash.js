@@ -223,17 +223,8 @@ const deleteDeckHandler = e => {
   const title = e.target.closest('.decks__item').firstElementChild.textContent.trim();
 
   // create delete confirmation modal
-  const modal = document.createElement('div');
-  modal.classList.add('modal');
-  modal.innerHTML = `
-    <div>
-      <h3>Are you sure?</h3>
-      <p>If you delete this deck, you will lose all of the progress you have made. Additionally, if you are this deck's creator and the deck is public, 
-      the deck will be deleted for all other users as well.</p>
-    </div>
-    <button type="button">Cancel</button>
-    <button type="button">Delete</button>
-  `;
+  const template = document.getElementById('delete-deck-template');
+  const modal = template.content.firstElementChild.cloneNode(true);
 
   // add listeners to the buttons
   const buttons = modal.querySelectorAll('button');

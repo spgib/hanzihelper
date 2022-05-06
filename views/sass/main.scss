@@ -21,5 +21,6 @@
   position: fixed;
   padding: 2rem;
   display: flex;
+  flex-direction: column;
   z-index: 20;
 }

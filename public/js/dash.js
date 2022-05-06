@@ -4,7 +4,10 @@ const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
 const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
 const tabLinks = document.querySelectorAll('.tab-link');
 const collapsibles = document.querySelectorAll('.collapsible');
-const collapsibleDeleteBtns = document.querySelectorAll('.collapsible__delete-btn');
+const collapsibleEditBtns = document.querySelectorAll('.collapsible__edit-btn');
+const collapsibleDeleteBtns = document.querySelectorAll(
+  '.collapsible__delete-btn'
+);
 
 const fetchHttp = async (url, method, body, form) => {
   try {
@@ -72,7 +75,7 @@ const toggleDashActionItems = (items) => {
 
     item.classList.toggle('hidden');
   });
-}
+};
 
 const closeModal = () => {
   const backdrop = document.querySelector('.backdrop');
@@ -112,7 +115,12 @@ const customDeckFormSubmissionHandler = async (e) => {
     title,
   };
 
-  const responseData = await fetchHttp('/dash/deck/custom', 'POST', body, e.target);
+  const responseData = await fetchHttp(
+    '/dash/deck/custom',
+    'POST',
+    body,
+    e.target
+  );
   if (responseData) {
     closeModal();
     dashActionBtn.click();
@@ -143,10 +151,15 @@ const addCardFormSubmissionHandler = async (e) => {
     deckId,
     hanzi,
     pinyin,
-    meaning
+    meaning,
   };
-  
-  const responseData = await fetchHttp('/dash/deck/addcard', 'POST', body, e.target);
+
+  const responseData = await fetchHttp(
+    '/dash/deck/addcard',
+    'POST',
+    body,
+    e.target
+  );
   if (responseData.message) {
     const inputs = e.target.querySelectorAll('input');
     inputs[0].focus();
@@ -180,16 +193,23 @@ const addDeckToList = (title, deckId, createdAt) => {
   const decksInfoList = decksInfoContainer.querySelector('ul');
 
   const deckItemTemplate = document.getElementById('deck-item-template');
-  const deckItemClone = deckItemTemplate.content.firstElementChild.cloneNode(true);
-  deckItemClone.querySelector('a').setAttribute('href', `/learn/deck/${deckId}`);
+  const deckItemClone =
+    deckItemTemplate.content.firstElementChild.cloneNode(true);
+  deckItemClone
+    .querySelector('a')
+    .setAttribute('href', `/learn/deck/${deckId}`);
   deckItemClone.querySelector('h3').textContent = title;
 
   const deckInfoTemplate = document.getElementById('deck-info-template');
-  const deckInfoClone = deckInfoTemplate.content.firstElementChild.cloneNode(true);
+  const deckInfoClone =
+    deckInfoTemplate.content.firstElementChild.cloneNode(true);
   const deckInfoBtn = deckInfoClone.querySelector('button');
   deckInfoBtn.textContent = title;
   deckInfoBtn.addEventListener('click', collapsibleHandler);
-  deckInfoClone.querySelector('p:last-of-type').textContent = 'Learning since: ' + createdAt;
+  deckInfoClone.querySelector('p:last-of-type').textContent =
+    'Learning since: ' + createdAt;
+  const editBtn = deckInfoClone.querySelector('.collapsible__edit-btn');
+  editBtn.addEventListener('click', editDeckHandler);
   const deleteBtn = deckInfoClone.querySelector('.collapsible__delete-btn');
   deleteBtn.addEventListener('click', deleteDeckHandler);
 
@@ -219,8 +239,10 @@ const addDeckToList = (title, deckId, createdAt) => {
   templateSelect.append(newOption);
 };
 
-const deleteDeckHandler = e => {
-  const title = e.target.closest('.decks__item').firstElementChild.textContent.trim();
+const deleteDeckHandler = (e) => {
+  const title = e.target
+    .closest('.decks__item')
+    .firstElementChild.textContent.trim();
 
   // create delete confirmation modal
   const template = document.getElementById('delete-deck-template');
@@ -233,7 +255,7 @@ const deleteDeckHandler = e => {
 
   // open backdrop
   createBackdrop(modal);
-}
+};
 
 const deleteDeck = async (deckTitle) => {
   await fetchHttp('/deck/' + deckTitle, 'DELETE');
@@ -254,6 +276,40 @@ const deleteDeck = async (deckTitle) => {
   }
 
   closeModal();
+};
+
+const editDeckHandler = (e) => {
+  // initialize template
+  const template = document.getElementById('edit-deck-template');
+  const modal = template.content.firstElementChild.cloneNode(true);
+
+  // extract preexisting data
+  const li = e.target.closest('li');
+  const title = li.querySelector('button').textContent.trim();
+  const description = li.querySelector('p').textContent.split(' ')[1];
+  const isPublicString = li.querySelector('p:last-of-type').textContent.split(' ')[2];
+  const isPublic = isPublicString === 'true' ? true : false;
+
+  // apply extracted data to modal
+  modal.querySelector('h3').textContent = title;
+  modal.querySelector('textarea').textContent = description;
+  if (isPublic) {
+    modal.querySelector('#visibilityChoice1').setAttribute('checked', true);
+  } else {
+    modal.querySelector('#visibilityChoice2').setAttribute('checked', true);
+  }
+
+  // add listeners
+  modal.querySelectorAll('button')[0].addEventListener('click', modalCancelHandler);
+  modal.querySelector('form').addEventListener('submit', editDeckSubmissionHandler);
+  
+
+  createBackdrop(modal);
+}
+
+const editDeckSubmissionHandler = e => {
+  e.preventDefault();
+  console.log(e.target[1].checked);
 }
 
 const httpMessageAlert = (message) => {
@@ -269,9 +325,12 @@ const httpMessageAlert = (message) => {
 collapsibles.forEach((collapsible) =>
   collapsible.addEventListener('click', collapsibleHandler)
 );
-collapsibleDeleteBtns.forEach(btn => {
-  btn.addEventListener('click', deleteDeckHandler)
-})
+collapsibleEditBtns.forEach((btn) => {
+  btn.addEventListener('click', editDeckHandler);
+});
+collapsibleDeleteBtns.forEach((btn) => {
+  btn.addEventListener('click', deleteDeckHandler);
+});
 dashActionBtn.addEventListener('click', actionItemsHandler);
 customDeckBtn.addEventListener('click', openCustomDeckHandler);
 addCardBtn.addEventListener('click', openAddCardHandler);

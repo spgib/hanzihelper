@@ -27,7 +27,7 @@ class UserDeck {
   static async getUserDecksInfo(userId) {
     const { rows } = await pool.query(
       `
-      SELECT decks.id, title, description, user_decks.id AS user_deck_id, user_decks.created_at
+      SELECT decks.id, title, description, user_decks.id AS user_deck_id, user_decks.created_at, public AS is_public
       FROM user_decks
       JOIN decks ON user_decks.deck_id = decks.id
       WHERE user_decks.user_id = $1;

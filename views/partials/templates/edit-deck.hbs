@@ -1,20 +1,35 @@
 <template id='edit-deck-template'>
   <div class='modal'>
+    <h3></h3>
     <form class='edit-deck-form'>
-      <h3></h3>
-      <hr />
       <div class='form-control'>
         <label for='deck-description'>Description</label>
-        <textarea id="deck-description" name='description' maxlength='200'></textarea>
-        <p>Decks can be shared with other users. Public decks can be seen and learned by others, while private decks are invisible to other users. I would like my deck to be:</p>
-        <input type="radio" name="visibility" id="visibilityChoice1" value="public">
-        <label for="visibilityChoice1">Public</label>
-        <input type="radio" name="visibility" id="visibilityChoice2" value="private">
-        <label for="visibilityChoice2">Private</label>
+        <textarea
+          id='deck-description'
+          name='description'
+          maxlength='200'
+        ></textarea>
+        <p>Decks can be shared with other users. Public decks can be seen and
+          learned by others, while private decks are invisible to other users. I
+          would like my deck to be:</p>
+        <input
+          type='radio'
+          name='visibility'
+          id='visibilityChoice1'
+          value='public'
+        />
+        <label for='visibilityChoice1'>Public</label>
+        <input
+          type='radio'
+          name='visibility'
+          id='visibilityChoice2'
+          value='private'
+        />
+        <label for='visibilityChoice2'>Private</label>
       </div>
-      <div class="form-actions">
-        <button type="button">Cancel</button>
-        <button type="submit">Save</button>
+      <div class='form-actions'>
+        <button type='button'>Cancel</button>
+        <button type='submit'>Save</button>
       </div>
     </form>
   </div>

@@ -33,11 +33,12 @@ const fetchHttp = async (url, method, body, form) => {
     return responseData;
   } catch (err) {
     const error = form.querySelector('h3');
+    console.log(error);
     if (error) {
-      error.innerHtml = err;
+      error.textContent = err;
     } else {
       const errorEl = document.createElement('h3');
-      errorEl.innerHTML = err;
+      errorEl.textContent = err;
       form.insertBefore(errorEl, form.firstChild);
     }
   }
@@ -301,15 +302,39 @@ const editDeckHandler = (e) => {
 
   // add listeners
   modal.querySelectorAll('button')[0].addEventListener('click', modalCancelHandler);
-  modal.querySelector('form').addEventListener('submit', editDeckSubmissionHandler);
+  modal.querySelector('form').addEventListener('submit', editDeckSubmissionHandler.bind(this, title));
   
 
   createBackdrop(modal);
 }
 
-const editDeckSubmissionHandler = e => {
+const editDeckSubmissionHandler = async (title, e) => {
   e.preventDefault();
-  console.log(e.target[1].checked);
+  const description = e.target[0].value;
+  const isPublic = e.target[1].checked;
+  
+  const body = {
+    title,
+    description,
+    isPublic
+  };
+
+  const responseData = await fetchHttp('/dash/deck/edit', 'PATCH', body, e.target);
+
+  if (responseData.message) {
+    closeModal();
+
+    // Update DOM
+    const deckList = document.querySelectorAll('.collapsible');
+    for (let deck of deckList) {
+      if (deck.textContent === title) {
+        const li = deck.closest('li');
+        const pList = li.querySelectorAll('p');
+        pList[0].textContent = 'Description: ' + description;
+        pList[3].textContent = 'Publicly visible: ' + isPublic;
+      }
+    }
+  }
 }
 
 const httpMessageAlert = (message) => {

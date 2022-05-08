@@ -17,6 +17,8 @@ router.post('/dash/deck/custom', authCheck, dashboardController.postCreateCustom
 
 router.post('/dash/deck/addCard', authCheck, dashboardController.postAddCard);
 
+router.patch('/dash/deck/edit', authCheck, dashboardController.patchDeck);
+
 router.patch('/learn/fail', authCheck, dashboardController.patchProbation);
 
 router.patch('/learn/success', authCheck, dashboardController.patchSuccess);

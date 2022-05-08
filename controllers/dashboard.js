@@ -533,3 +533,5 @@ exports.deleteDeck = async (req, res, next) => {
 
   return res.status(200).json({ message });
 };
+
+exports.patchDeck = async (req, res, next) => {};

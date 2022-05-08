@@ -534,4 +534,35 @@ exports.deleteDeck = async (req, res, next) => {
   return res.status(200).json({ message });
 };
 
-exports.patchDeck = async (req, res, next) => {};
+exports.patchDeck = async (req, res, next) => {
+  const userId = req.session.user.id;
+  const { title, description, isPublic } = req.body;
+
+  let deck;
+  try {
+    deck = await Deck.findByTitle(title);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  if (deck === undefined) {
+    const error = new HttpError('No deck can be found under this name. Please check your data.', 404);
+    return next(error);
+  }
+
+  if (deck.creatorId !== userId) {
+    const error = new HttpError("You are not this deck's creator and are unauthorized to alter its data.", 401);
+    return next(error);
+  }
+
+  let updatedDeck;
+  try {
+    updatedDeck = await Deck.updateDeck(deck.id, description, isPublic);
+  } catch (err) {
+    const error = new HttpError('Something went wrong, please try again.', 500);
+    return next(error);
+  }
+
+  return res.status(200).json({message: 'Updated deck!', deck: updatedDeck});
+};

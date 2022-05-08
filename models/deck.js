@@ -17,13 +17,12 @@ class Deck {
   }
 
   static async findByTitle(title) {
-    const { rows } = await pool.query(
-      `SELECT * FROM decks WHERE title = $1;`,
-      [title]
-    );
+    const { rows } = await pool.query(`SELECT * FROM decks WHERE title = $1;`, [
+      title,
+    ]);
 
     const parsedRows = toCamelCase(rows);
-    
+
     return parsedRows[0];
   }
 
@@ -65,8 +64,21 @@ class Deck {
     return parsedRows[0];
   }
 
+  static async updateDeck(id, description, isPublic) {
+    const { rows } = await pool.query(
+      `UPDATE decks SET description = $1, public = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *;`
+    );
+
+    const parsedRows = toCamelCase(rows);
+
+    return parsedRows[0];
+  }
+
   static async delete(id) {
-    const {rows} = await pool.query(`DELETE FROM decks WHERE id = $1 RETURNING *;`, [id]);
+    const { rows } = await pool.query(
+      `DELETE FROM decks WHERE id = $1 RETURNING *;`,
+      [id]
+    );
 
     const parsedRows = toCamelCase(rows);
 

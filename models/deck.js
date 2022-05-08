@@ -66,7 +66,8 @@ class Deck {
 
   static async updateDeck(id, description, isPublic) {
     const { rows } = await pool.query(
-      `UPDATE decks SET description = $1, public = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *;`
+      `UPDATE decks SET description = $1, public = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *;`,
+      [description, isPublic, id]
     );
 
     const parsedRows = toCamelCase(rows);

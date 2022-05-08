@@ -287,7 +287,8 @@ const editDeckHandler = (e) => {
   // extract preexisting data
   const li = e.target.closest('li');
   const title = li.querySelector('button').textContent.trim();
-  const description = li.querySelector('p').textContent.split(' ')[1];
+
+  const description = li.querySelector('p').textContent.split(' ').splice(1).join(' ');
   const isPublicString = li.querySelector('p:last-of-type').textContent.split(' ')[2];
   const isPublic = isPublicString === 'true' ? true : false;
 
@@ -327,9 +328,10 @@ const editDeckSubmissionHandler = async (title, e) => {
     // Update DOM
     const deckList = document.querySelectorAll('.collapsible');
     for (let deck of deckList) {
-      if (deck.textContent === title) {
+      if (deck.textContent.trim() === title) {
         const li = deck.closest('li');
         const pList = li.querySelectorAll('p');
+        console.log(pList);
         pList[0].textContent = 'Description: ' + description;
         pList[3].textContent = 'Publicly visible: ' + isPublic;
       }

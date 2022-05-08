@@ -545,21 +545,22 @@ exports.patchDeck = async (req, res, next) => {
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }
-
+  
   if (deck === undefined) {
     const error = new HttpError('No deck can be found under this name. Please check your data.', 404);
     return next(error);
   }
-
+  
   if (deck.creatorId !== userId) {
     const error = new HttpError("You are not this deck's creator and are unauthorized to alter its data.", 401);
     return next(error);
   }
-
+  
   let updatedDeck;
   try {
     updatedDeck = await Deck.updateDeck(deck.id, description, isPublic);
   } catch (err) {
+    console.log(err);
     const error = new HttpError('Something went wrong, please try again.', 500);
     return next(error);
   }

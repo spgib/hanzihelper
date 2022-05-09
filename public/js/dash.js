@@ -1,3 +1,86 @@
+class Dashboard {
+  constructor() {}
+
+  static init() {}
+
+  static async fetchHttp(url, method, body, form) {
+    try {
+      const token = document
+        .querySelector('meta[name="csrf-token"]')
+        .getAttribute('content');
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'CSRF-Token': token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message);
+      }
+
+      DOMHelper.showAlert(response.message);
+      return responseData;
+    } catch (err) {
+      if (form) {
+        DOMHelper.showFormError(form, response.message);
+      } else {
+        DOMHelper.showAlert(response.message);
+      }
+    }
+  }
+}
+
+class Deck {}
+
+class Controls {}
+
+class DOMHelper {
+  static showAlert(message) {
+    const alert = document.createElement('div');
+    alert.classList.add('alert');
+    alert.innerHTML = `<h3>${message}</h3>`;
+    document.body.append(alert);
+    setTimeout(() => {
+      alert.remove();
+    }, 2500);
+  }
+
+  static showFormError(form, error) {
+    const errorEl = form.querySelector('.form-error');
+    if (errorEl) {
+      errorEl.textContent = error;
+    } else {
+      const errorEl = document.createElement('h3');
+      errorEl.classList.add('form-error');
+      errorEl.textContent = error;
+      form.insertBefore(errorEl, form.firstChild);
+    }
+  }
+
+  static createBackdrop(content) {
+    const backdrop = document.createElement('div');
+    backdrop.classList.add('backdrop');
+    backdrop.append(content);
+    document.body.insertBefore(backdrop, document.body.firstChild);
+    backdrop.addEventListener('click', function (e) {
+      if (this === e.target) {
+        DOMHelper.closeModal();
+      }
+    });
+  }
+
+  static closeModal() {
+    const backdrop = document.querySelector('.backdrop');
+    backdrop.remove();
+  }
+}
+
 const dashActionBtn = document.querySelector('.dash__action-list button');
 const addDeckBtn = document.querySelectorAll('.dash__action-list button')[1];
 const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
@@ -8,41 +91,6 @@ const collapsibleEditBtns = document.querySelectorAll('.collapsible__edit-btn');
 const collapsibleDeleteBtns = document.querySelectorAll(
   '.collapsible__delete-btn'
 );
-
-const fetchHttp = async (url, method, body, form) => {
-  try {
-    const token = document
-      .querySelector('meta[name="csrf-token"]')
-      .getAttribute('content');
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        'CSRF-Token': token,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    const responseData = await response.json();
-
-    if (!response.ok) {
-      throw new Error(responseData.message);
-    }
-
-    return responseData;
-  } catch (err) {
-    const error = form.querySelector('h3');
-    console.log(error);
-    if (error) {
-      error.textContent = err;
-    } else {
-      const errorEl = document.createElement('h3');
-      errorEl.textContent = err;
-      form.insertBefore(errorEl, form.firstChild);
-    }
-  }
-};
 
 const tabHandler = (tab, e) => {
   const tabs = document.querySelectorAll('.tab-content');
@@ -76,25 +124,6 @@ const toggleDashActionItems = (items) => {
 
     item.classList.toggle('hidden');
   });
-};
-
-const closeModal = () => {
-  const backdrop = document.querySelector('.backdrop');
-  backdrop.remove();
-};
-
-const createBackdrop = (content) => {
-  const backdrop = document.createElement('div');
-  backdrop.classList.add('backdrop');
-  backdrop.append(content);
-  document.body.insertBefore(backdrop, document.body.firstChild);
-  backdrop.addEventListener('click', backdropClickHandler);
-};
-
-const backdropClickHandler = function (e) {
-  if (this === e.target) {
-    closeModal();
-  }
 };
 
 const openCustomDeckHandler = () => {
@@ -181,10 +210,6 @@ const addCardFormSubmissionHandler = async (e) => {
       }
     }
   }
-};
-
-const modalCancelHandler = () => {
-  closeModal();
 };
 
 const addDeckToList = (title, deckId, createdAt) => {
@@ -288,8 +313,14 @@ const editDeckHandler = (e) => {
   const li = e.target.closest('li');
   const title = li.querySelector('button').textContent.trim();
 
-  const description = li.querySelector('p').textContent.split(' ').splice(1).join(' ');
-  const isPublicString = li.querySelector('p:last-of-type').textContent.split(' ')[2];
+  const description = li
+    .querySelector('p')
+    .textContent.split(' ')
+    .splice(1)
+    .join(' ');
+  const isPublicString = li
+    .querySelector('p:last-of-type')
+    .textContent.split(' ')[2];
   const isPublic = isPublicString === 'true' ? true : false;
 
   // apply extracted data to modal
@@ -302,25 +333,33 @@ const editDeckHandler = (e) => {
   }
 
   // add listeners
-  modal.querySelectorAll('button')[0].addEventListener('click', modalCancelHandler);
-  modal.querySelector('form').addEventListener('submit', editDeckSubmissionHandler.bind(this, title));
-  
+  modal
+    .querySelectorAll('button')[0]
+    .addEventListener('click', modalCancelHandler);
+  modal
+    .querySelector('form')
+    .addEventListener('submit', editDeckSubmissionHandler.bind(this, title));
 
   createBackdrop(modal);
-}
+};
 
 const editDeckSubmissionHandler = async (title, e) => {
   e.preventDefault();
   const description = e.target[0].value;
   const isPublic = e.target[1].checked;
-  
+
   const body = {
     title,
     description,
-    isPublic
+    isPublic,
   };
 
-  const responseData = await fetchHttp('/dash/deck/edit', 'PATCH', body, e.target);
+  const responseData = await fetchHttp(
+    '/dash/deck/edit',
+    'PATCH',
+    body,
+    e.target
+  );
 
   if (responseData.message) {
     closeModal();
@@ -337,16 +376,6 @@ const editDeckSubmissionHandler = async (title, e) => {
       }
     }
   }
-}
-
-const httpMessageAlert = (message) => {
-  const alert = document.createElement('div');
-  alert.classList.add('alert');
-  alert.innerHTML = `<h3>${message}</h3>`;
-  document.body.append(alert);
-  setTimeout(() => {
-    alert.remove();
-  }, 2500);
 };
 
 collapsibles.forEach((collapsible) =>

@@ -24,3 +24,19 @@
   flex-direction: column;
   z-index: 20;
 }
+
+.revise {
+  color: red;
+}
+
+.refresh {
+  color: green;
+}
+
+.learn {
+  color: blue;
+}
+
+.cardStats p {
+  display: inline;
+}

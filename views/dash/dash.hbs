@@ -12,12 +12,14 @@
       {{else}}
         <ul class='decks__list'>
           {{#each decks}}
-            <li class='decks__item'>
-              <a class='decks__item-main' href="/learn/deck/{{this.id}}">
+            <li id="{{this.id}}" class='decks__item'>
+              <a class='decks__item-main' href='/learn/deck/{{this.id}}'>
                 <h3>{{this.title}}</h3>
-                <p>To revise: {{this.revisionCards}}</p>
-                <p>To refresh: {{this.refreshCards}}</p>
-                <p>To learn: {{this.unlearnedCards}}</p>
+                <div class='cardStats'>
+                  <p class='learn'>{{this.unlearnedCards}}</p>
+                  <p class='revise'>{{this.revisionCards}}</p>
+                  <p class='refresh'>{{this.refreshCards}}</p>
+                </div>
               </a>
             </li>
           {{/each}}
@@ -38,12 +40,22 @@
                 {{this.title}}
               </button>
               <div class='collapsible-content hidden'>
-                <p>Description: {{this.description}}</p>
-                <p>Total cards: {{this.totalCards}}</p>
-                <p>Learning since: {{this.createdAt}}</p>
-                <p>Publicly visible: {{this.isPublic}}</p>
-                <button class='collapsible__edit-btn' type="button">Edit</button>
-                <button class='collapsible__delete-btn' type="button">Delete</button>
+                <h4>Description</h4>
+                <p>{{this.description}}</p>
+                <h4>Total Cards</h4>
+                <p>{{this.totalCards}}</p>
+                <h4>Learning Since</h4>
+                <p>{{this.createdAt}}</p>
+                <h4>Publicly Visible</h4>
+                <p>{{this.isPublic}}</p>
+                <button
+                  class='collapsible__edit-btn'
+                  type='button'
+                >Edit</button>
+                <button
+                  class='collapsible__delete-btn'
+                  type='button'
+                >Delete</button>
               </div>
             </li>
           {{/each}}

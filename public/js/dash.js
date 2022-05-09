@@ -1,7 +1,11 @@
 class Dashboard {
-  constructor() {}
+  constructor() {
+    this.init();
+  }
 
-  static init() {}
+  init() {
+    new TabControls();
+  }
 
   static async fetchHttp(url, method, body, form) {
     try {
@@ -39,6 +43,50 @@ class Dashboard {
 class Deck {}
 
 class Controls {}
+
+class TabControls {
+  constructor() {
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContentList = document.querySelectorAll('.tab-content');
+    this.tabs = [
+      new Tab('learn', tabLinks[0], tabContentList[0], this.switch.bind(this)),
+      new Tab('info', tabLinks[1], tabContentList[1], this.switch.bind(this)),
+    ];
+
+    this.switch('learn');
+  }
+
+  switch(name) {
+    for (let tab of this.tabs) {
+      if (tab.name === name) {
+        tab.activate();
+      } else {
+        tab.deactivate();
+      }
+    }
+  }
+}
+
+class Tab {
+  constructor(name, button, content, callback) {
+    this.name = name;
+    this.button = button;
+    this.content = content;
+    this.switchCallback = callback;
+
+    this.button.addEventListener('click', this.switchCallback.bind(this, name));
+  }
+
+  activate() {
+    this.button.classList.add('active');
+    this.content.classList.remove('hidden');
+  }
+
+  deactivate() {
+    this.button.classList.remove('active');
+    this.content.classList.add('hidden');
+  }
+}
 
 class DOMHelper {
   static showAlert(message) {
@@ -81,316 +129,296 @@ class DOMHelper {
   }
 }
 
-const dashActionBtn = document.querySelector('.dash__action-list button');
-const addDeckBtn = document.querySelectorAll('.dash__action-list button')[1];
-const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
-const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
-const tabLinks = document.querySelectorAll('.tab-link');
-const collapsibles = document.querySelectorAll('.collapsible');
-const collapsibleEditBtns = document.querySelectorAll('.collapsible__edit-btn');
-const collapsibleDeleteBtns = document.querySelectorAll(
-  '.collapsible__delete-btn'
-);
+new Dashboard();
 
-const tabHandler = (tab, e) => {
-  const tabs = document.querySelectorAll('.tab-content');
-  const activeTab = document.getElementById(tab);
+// const dashActionBtn = document.querySelector('.dash__action-list button');
+// const addDeckBtn = document.querySelectorAll('.dash__action-list button')[1];
+// const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
+// const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
+// const collapsibles = document.querySelectorAll('.collapsible');
+// const collapsibleEditBtns = document.querySelectorAll('.collapsible__edit-btn');
+// const collapsibleDeleteBtns = document.querySelectorAll(
+//   '.collapsible__delete-btn'
+// );
 
-  tabs.forEach((tab) => {
-    if (tab.classList.contains('hidden')) return;
-    tab.classList.add('hidden');
-  });
+// const collapsibleHandler = (e) => {
+//   e.target.nextElementSibling.classList.toggle('hidden');
+// };
 
-  tabLinks.forEach((tabLink) => {
-    tabLink.classList.remove('active');
-  });
+// const actionItemsHandler = () => {
+//   const items = document.querySelectorAll('.dash__action-item');
+//   toggleDashActionItems(items);
+// };
 
-  activeTab.classList.remove('hidden');
-  e.target.classList.add('active');
-};
+// const toggleDashActionItems = (items) => {
+//   items.forEach((item, index) => {
+//     if (index === 0) return;
 
-const collapsibleHandler = (e) => {
-  e.target.nextElementSibling.classList.toggle('hidden');
-};
+//     item.classList.toggle('hidden');
+//   });
+// };
 
-const actionItemsHandler = () => {
-  const items = document.querySelectorAll('.dash__action-item');
-  toggleDashActionItems(items);
-};
+// const openCustomDeckHandler = () => {
+//   const template = document.querySelector('#custom-deck-template');
+//   const clone = template.content.firstElementChild.cloneNode(true);
 
-const toggleDashActionItems = (items) => {
-  items.forEach((item, index) => {
-    if (index === 0) return;
+//   clone.querySelector('button').addEventListener('click', modalCancelHandler);
+//   clone
+//     .querySelector('form')
+//     .addEventListener('submit', customDeckFormSubmissionHandler);
 
-    item.classList.toggle('hidden');
-  });
-};
+//   createBackdrop(clone);
+// };
 
-const openCustomDeckHandler = () => {
-  const template = document.querySelector('#custom-deck-template');
-  const clone = template.content.firstElementChild.cloneNode(true);
+// const customDeckFormSubmissionHandler = async (e) => {
+//   e.preventDefault();
+//   const title = e.target[0].value;
+//   const body = {
+//     title,
+//   };
 
-  clone.querySelector('button').addEventListener('click', modalCancelHandler);
-  clone
-    .querySelector('form')
-    .addEventListener('submit', customDeckFormSubmissionHandler);
+//   const responseData = await fetchHttp(
+//     '/dash/deck/custom',
+//     'POST',
+//     body,
+//     e.target
+//   );
+//   if (responseData) {
+//     closeModal();
+//     dashActionBtn.click();
+//     addDeckToList(title, responseData.deck.id, responseData.deck.createdAt);
+//     httpMessageAlert(responseData.message);
+//   }
+// };
 
-  createBackdrop(clone);
-};
+// const openAddCardHandler = () => {
+//   const template = document.getElementById('add-card-template');
+//   const clone = template.content.firstElementChild.cloneNode(true);
 
-const customDeckFormSubmissionHandler = async (e) => {
-  e.preventDefault();
-  const title = e.target[0].value;
-  const body = {
-    title,
-  };
+//   clone.querySelector('button').addEventListener('click', modalCancelHandler);
+//   clone
+//     .querySelector('form')
+//     .addEventListener('submit', addCardFormSubmissionHandler);
 
-  const responseData = await fetchHttp(
-    '/dash/deck/custom',
-    'POST',
-    body,
-    e.target
-  );
-  if (responseData) {
-    closeModal();
-    dashActionBtn.click();
-    addDeckToList(title, responseData.deck.id, responseData.deck.createdAt);
-    httpMessageAlert(responseData.message);
-  }
-};
+//   createBackdrop(clone);
+// };
 
-const openAddCardHandler = () => {
-  const template = document.getElementById('add-card-template');
-  const clone = template.content.firstElementChild.cloneNode(true);
+// const addCardFormSubmissionHandler = async (e) => {
+//   e.preventDefault();
+//   const deckId = e.target[0].value;
+//   const hanzi = e.target[1].value;
+//   const pinyin = e.target[2].value;
+//   const meaning = e.target[3].value;
+//   body = {
+//     deckId,
+//     hanzi,
+//     pinyin,
+//     meaning,
+//   };
 
-  clone.querySelector('button').addEventListener('click', modalCancelHandler);
-  clone
-    .querySelector('form')
-    .addEventListener('submit', addCardFormSubmissionHandler);
+//   const responseData = await fetchHttp(
+//     '/dash/deck/addcard',
+//     'POST',
+//     body,
+//     e.target
+//   );
+//   if (responseData.message) {
+//     const inputs = e.target.querySelectorAll('input');
+//     inputs[0].focus();
+//     for (let input of inputs) {
+//       input.value = '';
+//     }
+//     httpMessageAlert(responseData.message);
 
-  createBackdrop(clone);
-};
+//     // Update the DOM to increment the number of cards to be learned
+//     const deckLinks = document.querySelectorAll('.decks__item-main');
+//     for (let dl of deckLinks) {
+//       const href = dl.getAttribute('href').split('/');
+//       const id = href[href.length - 1];
+//       if (id === deckId) {
+//         const p = dl.querySelector('p:last-of-type');
+//         const numOfCards = p.textContent.split(' ')[2];
+//         p.textContent = 'To learn: ' + (parseInt(numOfCards) + 1);
+//       }
+//     }
+//   }
+// };
 
-const addCardFormSubmissionHandler = async (e) => {
-  e.preventDefault();
-  const deckId = e.target[0].value;
-  const hanzi = e.target[1].value;
-  const pinyin = e.target[2].value;
-  const meaning = e.target[3].value;
-  body = {
-    deckId,
-    hanzi,
-    pinyin,
-    meaning,
-  };
+// const addDeckToList = (title, deckId, createdAt) => {
+//   const decksContainer = document.querySelector('.dash__decks');
+//   const decksList = decksContainer.querySelector('ul');
+//   const decksInfoContainer = document.querySelector('.dash__decks-info');
+//   const decksInfoList = decksInfoContainer.querySelector('ul');
 
-  const responseData = await fetchHttp(
-    '/dash/deck/addcard',
-    'POST',
-    body,
-    e.target
-  );
-  if (responseData.message) {
-    const inputs = e.target.querySelectorAll('input');
-    inputs[0].focus();
-    for (let input of inputs) {
-      input.value = '';
-    }
-    httpMessageAlert(responseData.message);
+//   const deckItemTemplate = document.getElementById('deck-item-template');
+//   const deckItemClone =
+//     deckItemTemplate.content.firstElementChild.cloneNode(true);
+//   deckItemClone
+//     .querySelector('a')
+//     .setAttribute('href', `/learn/deck/${deckId}`);
+//   deckItemClone.querySelector('h3').textContent = title;
 
-    // Update the DOM to increment the number of cards to be learned
-    const deckLinks = document.querySelectorAll('.decks__item-main');
-    for (let dl of deckLinks) {
-      const href = dl.getAttribute('href').split('/');
-      const id = href[href.length - 1];
-      if (id === deckId) {
-        const p = dl.querySelector('p:last-of-type');
-        const numOfCards = p.textContent.split(' ')[2];
-        p.textContent = 'To learn: ' + (parseInt(numOfCards) + 1);
-      }
-    }
-  }
-};
+//   const deckInfoTemplate = document.getElementById('deck-info-template');
+//   const deckInfoClone =
+//     deckInfoTemplate.content.firstElementChild.cloneNode(true);
+//   const deckInfoBtn = deckInfoClone.querySelector('button');
+//   deckInfoBtn.textContent = title;
+//   deckInfoBtn.addEventListener('click', collapsibleHandler);
+//   deckInfoClone.querySelector('p:last-of-type').textContent =
+//     'Learning since: ' + createdAt;
+//   const editBtn = deckInfoClone.querySelector('.collapsible__edit-btn');
+//   editBtn.addEventListener('click', editDeckHandler);
+//   const deleteBtn = deckInfoClone.querySelector('.collapsible__delete-btn');
+//   deleteBtn.addEventListener('click', deleteDeckHandler);
 
-const addDeckToList = (title, deckId, createdAt) => {
-  const decksContainer = document.querySelector('.dash__decks');
-  const decksList = decksContainer.querySelector('ul');
-  const decksInfoContainer = document.querySelector('.dash__decks-info');
-  const decksInfoList = decksInfoContainer.querySelector('ul');
+//   if (!decksList) {
+//     decksContainer.firstElementChild.remove();
+//     const deckUl = document.createElement('ul');
+//     deckUl.classList.add('decks__list');
+//     deckUl.append(deckItemClone);
+//     decksContainer.append(deckUl);
 
-  const deckItemTemplate = document.getElementById('deck-item-template');
-  const deckItemClone =
-    deckItemTemplate.content.firstElementChild.cloneNode(true);
-  deckItemClone
-    .querySelector('a')
-    .setAttribute('href', `/learn/deck/${deckId}`);
-  deckItemClone.querySelector('h3').textContent = title;
+//     decksInfoContainer.firstElementChild.remove();
+//     const infoUl = document.createElement('ul');
+//     infoUl.classList.add('decks__list');
+//     infoUl.append(deckInfoTemplate);
+//     decksInfoContainer.append(infoUl);
+//   } else {
+//     decksList.append(deckItemClone);
+//     decksInfoList.append(deckInfoClone);
+//   }
 
-  const deckInfoTemplate = document.getElementById('deck-info-template');
-  const deckInfoClone =
-    deckInfoTemplate.content.firstElementChild.cloneNode(true);
-  const deckInfoBtn = deckInfoClone.querySelector('button');
-  deckInfoBtn.textContent = title;
-  deckInfoBtn.addEventListener('click', collapsibleHandler);
-  deckInfoClone.querySelector('p:last-of-type').textContent =
-    'Learning since: ' + createdAt;
-  const editBtn = deckInfoClone.querySelector('.collapsible__edit-btn');
-  editBtn.addEventListener('click', editDeckHandler);
-  const deleteBtn = deckInfoClone.querySelector('.collapsible__delete-btn');
-  deleteBtn.addEventListener('click', deleteDeckHandler);
+//   // Add an option for this deck to the select field on the add card form
+//   const addCardTemplate = document.getElementById('add-card-template');
+//   const templateSelect = addCardTemplate.content.querySelector('select');
+//   const newOption = document.createElement('option');
+//   newOption.value = deckId;
+//   newOption.textContent = title;
+//   templateSelect.append(newOption);
+// };
 
-  if (!decksList) {
-    decksContainer.firstElementChild.remove();
-    const deckUl = document.createElement('ul');
-    deckUl.classList.add('decks__list');
-    deckUl.append(deckItemClone);
-    decksContainer.append(deckUl);
+// const deleteDeckHandler = (e) => {
+//   const title = e.target
+//     .closest('.decks__item')
+//     .firstElementChild.textContent.trim();
 
-    decksInfoContainer.firstElementChild.remove();
-    const infoUl = document.createElement('ul');
-    infoUl.classList.add('decks__list');
-    infoUl.append(deckInfoTemplate);
-    decksInfoContainer.append(infoUl);
-  } else {
-    decksList.append(deckItemClone);
-    decksInfoList.append(deckInfoClone);
-  }
+//   // create delete confirmation modal
+//   const template = document.getElementById('delete-deck-template');
+//   const modal = template.content.firstElementChild.cloneNode(true);
 
-  // Add an option for this deck to the select field on the add card form
-  const addCardTemplate = document.getElementById('add-card-template');
-  const templateSelect = addCardTemplate.content.querySelector('select');
-  const newOption = document.createElement('option');
-  newOption.value = deckId;
-  newOption.textContent = title;
-  templateSelect.append(newOption);
-};
+//   // add listeners to the buttons
+//   const buttons = modal.querySelectorAll('button');
+//   buttons[0].addEventListener('click', modalCancelHandler);
+//   buttons[1].addEventListener('click', deleteDeck.bind(this, title));
 
-const deleteDeckHandler = (e) => {
-  const title = e.target
-    .closest('.decks__item')
-    .firstElementChild.textContent.trim();
+//   // open backdrop
+//   createBackdrop(modal);
+// };
 
-  // create delete confirmation modal
-  const template = document.getElementById('delete-deck-template');
-  const modal = template.content.firstElementChild.cloneNode(true);
+// const deleteDeck = async (deckTitle) => {
+//   await fetchHttp('/deck/' + deckTitle, 'DELETE');
 
-  // add listeners to the buttons
-  const buttons = modal.querySelectorAll('button');
-  buttons[0].addEventListener('click', modalCancelHandler);
-  buttons[1].addEventListener('click', deleteDeck.bind(this, title));
+//   // update DOM to remove deck list item and info collapsible
+//   const h3List = document.querySelectorAll('.decks__item h3');
+//   for (h3 of h3List) {
+//     if (h3.textContent.trim() === deckTitle) {
+//       h3.closest('.decks__item').remove();
+//     }
+//   }
 
-  // open backdrop
-  createBackdrop(modal);
-};
+//   const collapsibleBtnList = document.querySelectorAll('.collapsible');
+//   for (btn of collapsibleBtnList) {
+//     if (btn.textContent.trim() === deckTitle) {
+//       btn.closest('.decks__item').remove();
+//     }
+//   }
 
-const deleteDeck = async (deckTitle) => {
-  await fetchHttp('/deck/' + deckTitle, 'DELETE');
+//   closeModal();
+// };
 
-  // update DOM to remove deck list item and info collapsible
-  const h3List = document.querySelectorAll('.decks__item h3');
-  for (h3 of h3List) {
-    if (h3.textContent.trim() === deckTitle) {
-      h3.closest('.decks__item').remove();
-    }
-  }
+// const editDeckHandler = (e) => {
+//   // initialize template
+//   const template = document.getElementById('edit-deck-template');
+//   const modal = template.content.firstElementChild.cloneNode(true);
 
-  const collapsibleBtnList = document.querySelectorAll('.collapsible');
-  for (btn of collapsibleBtnList) {
-    if (btn.textContent.trim() === deckTitle) {
-      btn.closest('.decks__item').remove();
-    }
-  }
+//   // extract preexisting data
+//   const li = e.target.closest('li');
+//   const title = li.querySelector('button').textContent.trim();
 
-  closeModal();
-};
+//   const description = li
+//     .querySelector('p')
+//     .textContent.split(' ')
+//     .splice(1)
+//     .join(' ');
+//   const isPublicString = li
+//     .querySelector('p:last-of-type')
+//     .textContent.split(' ')[2];
+//   const isPublic = isPublicString === 'true' ? true : false;
 
-const editDeckHandler = (e) => {
-  // initialize template
-  const template = document.getElementById('edit-deck-template');
-  const modal = template.content.firstElementChild.cloneNode(true);
+//   // apply extracted data to modal
+//   modal.querySelector('h3').textContent = title;
+//   modal.querySelector('textarea').textContent = description;
+//   if (isPublic) {
+//     modal.querySelector('#visibilityChoice1').setAttribute('checked', true);
+//   } else {
+//     modal.querySelector('#visibilityChoice2').setAttribute('checked', true);
+//   }
 
-  // extract preexisting data
-  const li = e.target.closest('li');
-  const title = li.querySelector('button').textContent.trim();
+//   // add listeners
+//   modal
+//     .querySelectorAll('button')[0]
+//     .addEventListener('click', modalCancelHandler);
+//   modal
+//     .querySelector('form')
+//     .addEventListener('submit', editDeckSubmissionHandler.bind(this, title));
 
-  const description = li
-    .querySelector('p')
-    .textContent.split(' ')
-    .splice(1)
-    .join(' ');
-  const isPublicString = li
-    .querySelector('p:last-of-type')
-    .textContent.split(' ')[2];
-  const isPublic = isPublicString === 'true' ? true : false;
+//   createBackdrop(modal);
+// };
 
-  // apply extracted data to modal
-  modal.querySelector('h3').textContent = title;
-  modal.querySelector('textarea').textContent = description;
-  if (isPublic) {
-    modal.querySelector('#visibilityChoice1').setAttribute('checked', true);
-  } else {
-    modal.querySelector('#visibilityChoice2').setAttribute('checked', true);
-  }
+// const editDeckSubmissionHandler = async (title, e) => {
+//   e.preventDefault();
+//   const description = e.target[0].value;
+//   const isPublic = e.target[1].checked;
 
-  // add listeners
-  modal
-    .querySelectorAll('button')[0]
-    .addEventListener('click', modalCancelHandler);
-  modal
-    .querySelector('form')
-    .addEventListener('submit', editDeckSubmissionHandler.bind(this, title));
+//   const body = {
+//     title,
+//     description,
+//     isPublic,
+//   };
 
-  createBackdrop(modal);
-};
+//   const responseData = await fetchHttp(
+//     '/dash/deck/edit',
+//     'PATCH',
+//     body,
+//     e.target
+//   );
 
-const editDeckSubmissionHandler = async (title, e) => {
-  e.preventDefault();
-  const description = e.target[0].value;
-  const isPublic = e.target[1].checked;
+//   if (responseData.message) {
+//     closeModal();
 
-  const body = {
-    title,
-    description,
-    isPublic,
-  };
+//     // Update DOM
+//     const deckList = document.querySelectorAll('.collapsible');
+//     for (let deck of deckList) {
+//       if (deck.textContent.trim() === title) {
+//         const li = deck.closest('li');
+//         const pList = li.querySelectorAll('p');
+//         console.log(pList);
+//         pList[0].textContent = 'Description: ' + description;
+//         pList[3].textContent = 'Publicly visible: ' + isPublic;
+//       }
+//     }
+//   }
+// };
 
-  const responseData = await fetchHttp(
-    '/dash/deck/edit',
-    'PATCH',
-    body,
-    e.target
-  );
-
-  if (responseData.message) {
-    closeModal();
-
-    // Update DOM
-    const deckList = document.querySelectorAll('.collapsible');
-    for (let deck of deckList) {
-      if (deck.textContent.trim() === title) {
-        const li = deck.closest('li');
-        const pList = li.querySelectorAll('p');
-        console.log(pList);
-        pList[0].textContent = 'Description: ' + description;
-        pList[3].textContent = 'Publicly visible: ' + isPublic;
-      }
-    }
-  }
-};
-
-collapsibles.forEach((collapsible) =>
-  collapsible.addEventListener('click', collapsibleHandler)
-);
-collapsibleEditBtns.forEach((btn) => {
-  btn.addEventListener('click', editDeckHandler);
-});
-collapsibleDeleteBtns.forEach((btn) => {
-  btn.addEventListener('click', deleteDeckHandler);
-});
-dashActionBtn.addEventListener('click', actionItemsHandler);
-customDeckBtn.addEventListener('click', openCustomDeckHandler);
-addCardBtn.addEventListener('click', openAddCardHandler);
-tabLinks[0].addEventListener('click', tabHandler.bind(this, 'learn-tab'));
-tabLinks[1].addEventListener('click', tabHandler.bind(this, 'info-tab'));
-
-tabLinks[0].click();
+// collapsibles.forEach((collapsible) =>
+//   collapsible.addEventListener('click', collapsibleHandler)
+// );
+// collapsibleEditBtns.forEach((btn) => {
+//   btn.addEventListener('click', editDeckHandler);
+// });
+// collapsibleDeleteBtns.forEach((btn) => {
+//   btn.addEventListener('click', deleteDeckHandler);
+// });
+// dashActionBtn.addEventListener('click', actionItemsHandler);
+// customDeckBtn.addEventListener('click', openCustomDeckHandler);
+// addCardBtn.addEventListener('click', openAddCardHandler);

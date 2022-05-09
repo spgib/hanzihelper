@@ -40,14 +40,14 @@
                 {{this.title}}
               </button>
               <div class='collapsible-content hidden'>
-                <h4>Description</h4>
-                <p>{{this.description}}</p>
-                <h4>Total Cards</h4>
-                <p>{{this.totalCards}}</p>
-                <h4>Learning Since</h4>
-                <p>{{this.createdAt}}</p>
-                <h4>Publicly Visible</h4>
-                <p>{{this.isPublic}}</p>
+                <h4 class="collapsible__info-label">Description</h4>
+                <p class="collapsible__description">{{this.description}}</p>
+                <h4 class="collapsible__info-label">Total Cards</h4>
+                <p class="collapsible__total-cards">{{this.totalCards}}</p>
+                <h4 class="collapsible__info-label">Learning Since</h4>
+                <p class="collapsible__learning-since">{{this.createdAt}}</p>
+                <h4 class="collapsible__info-label">Publicly Visible</h4>
+                <p class="collapsible__visibility">{{this.isPublic}}</p>
                 <button
                   class='collapsible__edit-btn'
                   type='button'

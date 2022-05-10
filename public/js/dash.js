@@ -54,26 +54,36 @@ class Deck {
   constructor(learnEl, infoEl) {
     this.elements = {
       learn: learnEl,
-      info: infoEl
-    }
+      info: infoEl,
+    };
     this.id = learnEl.id;
     this.title = learnEl.querySelector('h3').textContent.trim();
     this.cards = {
-      learn:  +learnEl.querySelector('.learn').textContent.trim(),
+      learn: +learnEl.querySelector('.learn').textContent.trim(),
       revise: +learnEl.querySelector('.revise').textContent.trim(),
       refresh: +learnEl.querySelector('.refresh').textContent.trim(),
-      total: +infoEl.querySelector('.collapsible__total-cards').textContent.trim()
-    }
+      total: +infoEl
+        .querySelector('.collapsible__total-cards')
+        .textContent.trim(),
+    };
     this.info = {
-      description: infoEl.querySelector('.collapsible__description').textContent.trim(),
-      learningSince: infoEl.querySelector('.collapsible__learning-since').textContent.trim(),
-      visibility: infoEl.querySelector('.collapsible__visibility').textContent.trim() === 'true' ? true : false
-    }
+      description: infoEl
+        .querySelector('.collapsible__description')
+        .textContent.trim(),
+      learningSince: infoEl
+        .querySelector('.collapsible__learning-since')
+        .textContent.trim(),
+      visibility:
+        infoEl.querySelector('.collapsible__visibility').textContent.trim() ===
+        'true'
+          ? true
+          : false,
+    };
     this.buttons = {
       collapsible: infoEl.querySelector('.collapsible'),
       edit: infoEl.querySelector('.collapsible__edit-btn'),
-      delete: infoEl.querySelector('.collapsible__delete-btn')
-    }
+      delete: infoEl.querySelector('.collapsible__delete-btn'),
+    };
 
     this.buttons.collapsible.addEventListener('click', (e) => {
       e.target.nextElementSibling.classList.toggle('hidden');
@@ -83,7 +93,28 @@ class Deck {
 
 class AddControls {
   constructor() {
+    this.toggleBtn = document.querySelector('.dash__action-toggle button');
+    this.actionItems = document.querySelectorAll('.dash__action-item');
+    this.addDeckBtn = document.querySelector('.action__add-deck button');
+    this.createCustomBtn = document.querySelector('.action__create-custom button');
+    this.addCardBtn = document.querySelector('.action__add-card button');
 
+    this.toggleBtn.addEventListener('click', () => {
+      this.actionItems.forEach((item) => item.classList.toggle('hidden'));
+    });
+    this.addDeckBtn.addEventListener('click', () => {
+      
+    });
+    this.createCustomBtn.addEventListener('click', () => {
+      DOMHelper.createStandardModal('custom-deck-template', (e) => {
+        e.preventDefault();
+      });
+    });
+    this.addCardBtn.addEventListener('click', () => {
+      DOMHelper.createStandardModal('add-card-template', e => {
+        e.preventDefault();
+      })
+    });
   }
 }
 
@@ -95,7 +126,7 @@ class TabControls {
       new Tab('learn', tabLinks[0], tabContentList[0], this.switch.bind(this)),
       new Tab('info', tabLinks[1], tabContentList[1], this.switch.bind(this)),
     ];
-    
+
     this.switch('learn');
   }
 
@@ -116,15 +147,15 @@ class Tab {
     this.button = button;
     this.content = content;
     this.switchCallback = callback;
-    
+
     this.button.addEventListener('click', this.switchCallback.bind(this, name));
   }
-  
+
   activate() {
     this.button.classList.add('active');
     this.content.classList.remove('hidden');
   }
-  
+
   deactivate() {
     this.button.classList.remove('active');
     this.content.classList.add('hidden');
@@ -154,6 +185,35 @@ class DOMHelper {
     }
   }
 
+  static createStandardModal(templateId, confirmFn, insertDataFn) {
+    const template = document.getElementById(templateId);
+    const clone = template.content.firstElementChild.cloneNode(true);
+
+    if (insertDataFn) {
+      insertDataFn(clone);
+    }
+
+    const form = clone.querySelector('form');
+
+    let cancelBtn;
+    if (!form) {
+      cancelBtn = clone.querySelector('.modal__action--cancel');
+      const confirmBtn = clone.querySelector('.modal__action--confirm');
+
+      confirmBtn.addEventListener('click', confirmFn);
+    } else {
+      cancelBtn = clone.querySelector('button[type="button"]');
+
+      form.addEventListener('submit', confirmFn);
+    }
+
+    cancelBtn.addEventListener('click', () => {
+      this.closeModal();
+    });
+
+    DOMHelper.createBackdrop(clone);
+  }
+
   static createBackdrop(content) {
     const backdrop = document.createElement('div');
     backdrop.classList.add('backdrop');
@@ -173,24 +233,6 @@ class DOMHelper {
 }
 
 new Dashboard();
-
-// const dashActionBtn = document.querySelector('.dash__action-list button');
-// const addDeckBtn = document.querySelectorAll('.dash__action-list button')[1];
-// const customDeckBtn = document.querySelectorAll('.dash__action-list button')[2];
-// const addCardBtn = document.querySelectorAll('.dash__action-list button')[3];
-
-// const actionItemsHandler = () => {
-//   const items = document.querySelectorAll('.dash__action-item');
-//   toggleDashActionItems(items);
-// };
-
-// const toggleDashActionItems = (items) => {
-//   items.forEach((item, index) => {
-//     if (index === 0) return;
-
-//     item.classList.toggle('hidden');
-//   });
-// };
 
 // const openCustomDeckHandler = () => {
 //   const template = document.querySelector('#custom-deck-template');
@@ -223,18 +265,6 @@ new Dashboard();
 //     addDeckToList(title, responseData.deck.id, responseData.deck.createdAt);
 //     httpMessageAlert(responseData.message);
 //   }
-// };
-
-// const openAddCardHandler = () => {
-//   const template = document.getElementById('add-card-template');
-//   const clone = template.content.firstElementChild.cloneNode(true);
-
-//   clone.querySelector('button').addEventListener('click', modalCancelHandler);
-//   clone
-//     .querySelector('form')
-//     .addEventListener('submit', addCardFormSubmissionHandler);
-
-//   createBackdrop(clone);
 // };
 
 // const addCardFormSubmissionHandler = async (e) => {
@@ -443,7 +473,3 @@ new Dashboard();
 //     }
 //   }
 // };
-
-// dashActionBtn.addEventListener('click', actionItemsHandler);
-// customDeckBtn.addEventListener('click', openCustomDeckHandler);
-// addCardBtn.addEventListener('click', openAddCardHandler);
